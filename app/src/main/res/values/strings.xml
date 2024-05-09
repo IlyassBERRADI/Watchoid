@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Watchoid</string>
+    <string name="title_activity_protocol_chooser">Protocol_Chooser</string>
+    <string name="title_activity_icmpactivity">ICMPActivity</string>
 </resources>
