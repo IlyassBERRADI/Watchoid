@@ -4,7 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -22,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -60,25 +64,28 @@ class MainActivity : ComponentActivity() {
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Button(
-                        onClick = {
+                    Image(
+                        painter = painterResource(id = R.drawable.plus),
+                        contentDescription = "Image 1",
+                        modifier = Modifier.size(50.dp).clickable {
                             val navigate = Intent(this@MainActivity, Protocol_chooser::class.java)
                             startActivity(navigate)
-                        }) {
-                        Text(text = "New test", fontSize = 20.sp)
-                    }
+                        }
+                    )
                     Text(
                         text = "Watchoid",
                         fontSize = 50.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.align(Alignment.CenterVertically)
                     )
-                    Button(onClick = {
-                        val navigate = Intent(this@MainActivity, Settings::class.java)
-                        startActivity(navigate)
-                    }) {
-                        Text(text = "Settings", fontSize = 20.sp)
-                    }
+                    Image(
+                        painter = painterResource(id = R.drawable.parametres),
+                        contentDescription = "Image 2",
+                        modifier = Modifier.size(50.dp).clickable {
+                            val navigate = Intent(this@MainActivity, Protocol_chooser::class.java)
+                            startActivity(navigate)
+                        }
+                    )
                 }
             }
         }
