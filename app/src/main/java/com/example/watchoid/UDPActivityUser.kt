@@ -44,14 +44,14 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 
-class UDPActivity : ComponentActivity() {
+class UDPActivityUser : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             WatchoidTheme {
                 // A surface container using the 'background' color from the theme
                 Surface {
-                    background()
+                    backgroundUDP()
                     var selectedType by remember { mutableStateOf("") }
                     var userText by remember { mutableStateOf("") }
                     DropdownMenuWithTextField(
@@ -68,7 +68,7 @@ class UDPActivity : ComponentActivity() {
 
 
 @Composable
-fun background(){
+fun backgroundUDP(){
     Box(modifier = Modifier
         .fillMaxSize()
         .background(Color.LightGray))

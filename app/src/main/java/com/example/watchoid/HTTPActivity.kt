@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,23 +27,25 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.watchoid.ui.theme.WatchoidTheme
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 
-class ICMPActivity : ComponentActivity() {
+class HTTPActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            backgroundICMP()
-            ICMPDemo()
+            backgroundHTTP()
+            HTTPTest()
         }
     }
 
     @Composable
-    fun backgroundICMP(){
+    fun backgroundHTTP(){
         Box(modifier = Modifier
             .fillMaxSize()
             .background(Color.LightGray))
@@ -58,7 +62,7 @@ class ICMPActivity : ComponentActivity() {
                     )
                     .background(color = Color.LightGray) // Couleur du rectangle
             ) {
-                Text(text = "ICMP Test",
+                Text(text = "HTTP Test",
                     fontSize = 50.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.Center)
@@ -68,7 +72,7 @@ class ICMPActivity : ComponentActivity() {
     }
 
     @Composable
-    fun ICMPDemo() {
+    fun HTTPTest() {
         var serverAddress = "10.0.2.2"
         var serverPort = 7777
         var ping by remember { mutableStateOf(false) }

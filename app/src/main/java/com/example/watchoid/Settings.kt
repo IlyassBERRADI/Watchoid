@@ -1,18 +1,13 @@
 package com.example.watchoid
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -28,21 +23,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.watchoid.ui.theme.WatchoidTheme
 
-class MainActivity : ComponentActivity() {
+class Settings : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            backgroundMain()
+            backgroundSettings()
         }
     }
 
     @Composable
-    fun backgroundMain() {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.LightGray)
-        ) {
+    fun backgroundSettings(){
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .background(Color.LightGray))
+        {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -55,33 +49,12 @@ class MainActivity : ComponentActivity() {
                     )
                     .background(color = Color.LightGray) // Couleur du rectangle
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Button(
-                        onClick = {
-                            val navigate = Intent(this@MainActivity, Protocol_chooser::class.java)
-                            startActivity(navigate)
-                        }) {
-                        Text(text = "New test", fontSize = 20.sp)
-                    }
-                    Text(
-                        text = "Watchoid",
-                        fontSize = 50.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    )
-                    Button(onClick = {
-                        val navigate = Intent(this@MainActivity, Settings::class.java)
-                        startActivity(navigate)
-                    }) {
-                        Text(text = "Settings", fontSize = 20.sp)
-                    }
-                }
+                Text(text = "Settings",
+                    fontSize = 50.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
         }
     }
-
 }

@@ -16,12 +16,37 @@
         android:theme="@style/Theme.Watchoid"
         tools:targetApi="31">
         <activity
+            android:name=".TPCActivity"
+            android:exported="false"
+            android:label="@string/title_activity_tpcactivity"
+            android:theme="@style/Theme.Watchoid" />
+        <activity
+            android:name=".HTTPActivity"
+            android:exported="false"
+            android:label="@string/title_activity_httpactivity"
+            android:theme="@style/Theme.Watchoid" />
+        <activity
+            android:name=".Protocol_chooser"
+            android:exported="false"
+            android:label="@string/title_activity_main"
+            android:theme="@style/Theme.Watchoid" />
+        <activity
+            android:name=".Settings"
+            android:exported="false"
+            android:label="@string/title_activity_settings"
+            android:theme="@style/Theme.Watchoid" />
+        <activity
             android:name=".ICMPActivity"
             android:exported="false"
             android:label="@string/title_activity_icmpactivity"
             android:theme="@style/Theme.Watchoid" />
         <activity
-            android:name=".UDPActivity"
+            android:name=".ICMPActivityUser"
+            android:exported="false"
+            android:label="@string/title_activity_icmpactivity"
+            android:theme="@style/Theme.Watchoid" />
+        <activity
+            android:name=".UDPActivityUser"
             android:exported="false"
             android:label="@string/title_activity_protocol_chooser"
             android:theme="@style/Theme.Watchoid" />

@@ -2,4 +2,8 @@
     <string name="app_name">Watchoid</string>
     <string name="title_activity_protocol_chooser">Protocol_Chooser</string>
     <string name="title_activity_icmpactivity">ICMPActivity</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_httpactivity">HTTPActivity</string>
+    <string name="title_activity_tpcactivity">TPCActivity</string>
 </resources>

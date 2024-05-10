@@ -13,7 +13,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,17 +34,17 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 
-class ICMPActivity : ComponentActivity() {
+class ICMPActivityUser : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            backgroundICMP()
+            backgroundICMPU()
             ICMPDemo()
         }
     }
 
     @Composable
-    fun backgroundICMP(){
+    fun backgroundICMPU(){
         Box(modifier = Modifier
             .fillMaxSize()
             .background(Color.LightGray))
@@ -58,7 +61,7 @@ class ICMPActivity : ComponentActivity() {
                     )
                     .background(color = Color.LightGray) // Couleur du rectangle
             ) {
-                Text(text = "ICMP Test",
+                Text(text = "UDP Test",
                     fontSize = 50.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.Center)
@@ -66,37 +69,26 @@ class ICMPActivity : ComponentActivity() {
             }
         }
     }
-
     @Composable
     fun ICMPDemo() {
-        var serverAddress = "10.0.2.2"
-        var serverPort = 7777
+        var serverAddress by remember { mutableStateOf("") }
+        var serverPort by remember { mutableStateOf("") }
         var ping by remember { mutableStateOf(false) }
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxSize().padding(16.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally // Alignement horizontal au centre
-        ) {Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp) // Hauteur du rectangle
-                .background(color = Color.White) // Couleur du rectangle
         ) {
-            if (ping) {
-                Text(
-                    text = "Server has been reached !\n Test passed ",
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            } else {
-                Text(
-                    text = "Server is disconnected !\n Test not passed ",
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-        }
-
+            OutlinedTextField(
+                value = serverAddress,
+                onValueChange = { serverAddress = it },
+                label = { Text("Server Address") }
+            )
+            OutlinedTextField(
+                value = serverPort,
+                onValueChange = { serverPort = it },
+                label = { Text("Server Port") }
+            )
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
@@ -114,7 +106,7 @@ class ICMPActivity : ComponentActivity() {
 
                             // Prepare the ICMP packet
                             val data = ByteArray(packetSize)
-                            val packet = DatagramPacket(data, data.size, address, serverPort)
+                            val packet = DatagramPacket(data, data.size, address, serverPort.toIntOrNull() ?: 0)
 
                             // Send the packet
                             socket.send(packet)
@@ -137,6 +129,18 @@ class ICMPActivity : ComponentActivity() {
                 }
             ) {
                 Text("Envoyer")
+            }
+        }
+
+        if (ping) {
+            Snackbar(
+                action = {
+                    TextButton(onClick = { ping = false }) {
+                        Text("OK")
+                    }
+                }
+            ) {
+                Text("Serveur est lààà !!")
             }
         }
     }
