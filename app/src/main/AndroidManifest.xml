@@ -14,8 +14,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Watchoid"
-        tools:targetApi="31"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        tools:targetApi="31">
+        <activity
+            android:name=".Alert"
+            android:exported="false"
+            android:label="@string/title_activity_alert"
+            android:theme="@style/Theme.Watchoid" />
+        <activity
+            android:name=".Log"
+            android:exported="false"
+            android:label="@string/title_activity_log"
+            android:theme="@style/Theme.Watchoid" />
         <activity
             android:name=".TPCActivity"
             android:exported="false"

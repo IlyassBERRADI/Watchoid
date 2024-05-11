@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -119,7 +121,8 @@ class HTTPActivity : ComponentActivity() {
 
                     }.start()
                 }
-            ) {
+                , shape = RoundedCornerShape(0.dp),
+                colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
                 Text("Envoyer")
             }
 
@@ -194,7 +197,8 @@ class HTTPActivity : ComponentActivity() {
                         }
                     }.start()
                 }
-            ) {
+                , shape = RoundedCornerShape(0.dp),
+                colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
                 Text("Envoyer")
             }
         }

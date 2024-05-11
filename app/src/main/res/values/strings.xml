@@ -6,4 +6,6 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_httpactivity">HTTPActivity</string>
     <string name="title_activity_tpcactivity">TPCActivity</string>
+    <string name="title_activity_log">Log</string>
+    <string name="title_activity_alert">Alert</string>
 </resources>

@@ -9,15 +9,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -34,36 +30,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.watchoid.ui.theme.WatchoidTheme
 
-class MainActivity : ComponentActivity() {
+class Log : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            backgroundMain()
-            Column(modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Button(onClick = {
-                    val navigate = Intent(this@MainActivity, Protocol_chooser::class.java)
-                    startActivity(navigate)
-                }, shape = RoundedCornerShape(0.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))
-                ) {
-                    Text(text = "New Test", fontSize = 20.sp)
-                }
-                Button(onClick = {
-                    val navigate = Intent(this@MainActivity, Log::class.java)
-                    startActivity(navigate)
-                }, shape = RoundedCornerShape(0.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
-                    Text(text = "See Logs", fontSize = 20.sp)
-                }
-            }
+            backgroundLog()
         }
     }
 
     @Composable
-    fun backgroundMain() {
+    fun backgroundLog() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -86,31 +62,14 @@ class MainActivity : ComponentActivity() {
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.notification),
-                        contentDescription = "Image 1",
-                        modifier = Modifier.size(50.dp).clickable {
-                            val navigate = Intent(this@MainActivity, Alert::class.java)
-                            startActivity(navigate)
-                        }
-                    )
                     Text(
-                        text = "Watchoid",
+                        text = "Logs",
                         fontSize = 50.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.align(Alignment.CenterVertically)
-                    )
-                    Image(
-                        painter = painterResource(id = R.drawable.parametres),
-                        contentDescription = "Image 2",
-                        modifier = Modifier.size(50.dp).clickable {
-                            val navigate = Intent(this@MainActivity, Settings::class.java)
-                            startActivity(navigate)
-                        }
                     )
                 }
             }
         }
     }
-
 }

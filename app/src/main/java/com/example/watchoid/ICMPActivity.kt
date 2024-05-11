@@ -12,12 +12,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +30,10 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
@@ -72,6 +79,7 @@ class ICMPActivity : ComponentActivity() {
         var serverAddress = "10.0.2.2"
         var serverPort = 7777
         var ping by remember { mutableStateOf(false) }
+        val coroutineScope = rememberCoroutineScope()
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -101,7 +109,7 @@ class ICMPActivity : ComponentActivity() {
             Button(
                 onClick = {
 
-                    Thread {
+                    coroutineScope.launch(IO) {
                         val timeout = 5000 // 5 seconds
                         val packetSize = 64 // ICMP packet size
 
@@ -133,9 +141,10 @@ class ICMPActivity : ComponentActivity() {
                             println("Error sending ping: ${e.message}")
                             ping = false
                         }
-                    }.start()
+                    }
                 }
-            ) {
+                , shape = RoundedCornerShape(0.dp),
+                colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
                 Text("Envoyer")
             }
         }

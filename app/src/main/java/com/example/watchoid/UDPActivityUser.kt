@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -150,7 +152,8 @@ fun UDPDemo(messageToSend: String) {
                     }.start()
                 snackbarVisible = true
             }
-        ) {
+            , shape = RoundedCornerShape(0.dp),
+            colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
             Text("Envoyer")
         }
     }
