@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.room)
     implementation(libs.androidx.room.ktx)
+    implementation ("com.squareup.okhttp3:okhttp:4.9.1")
     kapt(libs.androidx.room.compiler)
     annotationProcessor(libs.androidx.room.compiler)
     testImplementation(libs.junit)
