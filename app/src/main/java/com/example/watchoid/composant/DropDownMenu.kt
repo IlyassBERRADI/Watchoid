@@ -1,5 +1,6 @@
 package com.example.watchoid.composant
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DropdownMenuItem
@@ -26,16 +27,15 @@ fun DropDownMenu(
     modifier: Modifier = Modifier
 ){
     var isExpanded by remember { mutableStateOf(false) }
-
     // Menu déroulant
     ExposedDropdownMenuBox(
         expanded = isExpanded,
         onExpandedChange = { isExpanded = it },
-        modifier = modifier.padding(end = 8.dp)
+        modifier = modifier
     ) {
 
         TextField(
-            value = type,
+            value = type.value,
             onValueChange = { },
             readOnly = true,
             enabled = false,
@@ -43,7 +43,9 @@ fun DropDownMenu(
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
             },
             colors = ExposedDropdownMenuDefaults.textFieldColors(),
-            modifier = Modifier.menuAnchor()
+            modifier = Modifier
+                .clickable(onClick = { isExpanded = true })
+                .menuAnchor()
         )
 
         ExposedDropdownMenu(
@@ -56,7 +58,7 @@ fun DropDownMenu(
                         Text(text = item)
                     },
                     onClick = {
-                        type = "HTTP"
+                        type.value = item
                         isExpanded = false
                     }
                 )

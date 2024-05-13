@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.watchoid.composant.Background
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -45,36 +46,9 @@ class HTTPActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            backgroundHTTP()
+            Background(text = "HTTP Test", main = false)
             JsonTest()
             //HTTPTest()
-        }
-    }
-
-    @Composable
-    fun backgroundHTTP(){
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .background(Color.LightGray))
-        {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp) // Hauteur du rectangle
-                    .align(Alignment.TopCenter) // Alignement en haut
-                    .shadow( // Ajouter une ombre
-                        elevation = 8.dp, // Taille de l'ombre
-                        shape = RectangleShape, // Forme de l'ombre
-                        clip = true // Découpe le contenu à la forme de l'ombre
-                    )
-                    .background(color = Color.LightGray) // Couleur du rectangle
-            ) {
-                Text(text = "HTTP Test",
-                    fontSize = 50.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
         }
     }
 

@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.watchoid.composant.Background
 import com.example.watchoid.ui.theme.WatchoidTheme
 import java.net.DatagramPacket
 import java.net.DatagramSocket
@@ -53,7 +54,7 @@ class UDPActivityUser : ComponentActivity() {
             WatchoidTheme {
                 // A surface container using the 'background' color from the theme
                 Surface {
-                    backgroundUDP()
+                    Background(text = "UDP Test", main = false)
                     var selectedType by remember { mutableStateOf("") }
                     var userText by remember { mutableStateOf("") }
                     DropdownMenuWithTextField(
@@ -63,35 +64,6 @@ class UDPActivityUser : ComponentActivity() {
                     UDPDemo(userText)
                 }
             }
-        }
-    }
-}
-
-
-
-@Composable
-fun backgroundUDP(){
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(Color.LightGray))
-    {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp) // Hauteur du rectangle
-                .align(Alignment.TopCenter) // Alignement en haut
-                .shadow( // Ajouter une ombre
-                    elevation = 8.dp, // Taille de l'ombre
-                    shape = RectangleShape, // Forme de l'ombre
-                    clip = true // Découpe le contenu à la forme de l'ombre
-                )
-                .background(color = Color.LightGray) // Couleur du rectangle
-        ) {
-            Text(text = "UDP Test",
-                fontSize = 50.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.Center)
-            )
         }
     }
 }

@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.watchoid.composant.Background
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.coroutineScope
@@ -42,38 +43,10 @@ class ICMPActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            backgroundICMP()
+            Background(text = "ICMP Test", main = false)
             ICMPDemo()
         }
     }
-
-    @Composable
-    fun backgroundICMP(){
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .background(Color.LightGray))
-        {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp) // Hauteur du rectangle
-                    .align(Alignment.TopCenter) // Alignement en haut
-                    .shadow( // Ajouter une ombre
-                        elevation = 8.dp, // Taille de l'ombre
-                        shape = RectangleShape, // Forme de l'ombre
-                        clip = true // Découpe le contenu à la forme de l'ombre
-                    )
-                    .background(color = Color.LightGray) // Couleur du rectangle
-            ) {
-                Text(text = "ICMP Test",
-                    fontSize = 50.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-        }
-    }
-
     @Composable
     fun ICMPDemo() {
         var serverAddress = "10.0.2.2"

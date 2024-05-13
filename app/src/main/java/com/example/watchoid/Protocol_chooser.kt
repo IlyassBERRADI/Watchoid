@@ -24,72 +24,22 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.watchoid.composant.Background
+import com.example.watchoid.composant.NavigationButton
 
 class Protocol_chooser : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            backgroundProtocol()
-            
+            Background(text = "New Test", main = false)
             Column(modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Button(onClick = {
-                    val navigate = Intent(this@Protocol_chooser, UDPActivityUser::class.java)
-                    startActivity(navigate)
-                }, shape = RoundedCornerShape(0.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
-                    Text(text = "UDP", fontSize = 20.sp)
-                }
-                Button(onClick = {
-                    val navigate = Intent(this@Protocol_chooser, TPCActivity::class.java)
-                    startActivity(navigate)
-                }, shape = RoundedCornerShape(0.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
-                    Text(text = "TCP", fontSize = 20.sp)
-                }
-                Button(onClick = {
-                    val navigate = Intent(this@Protocol_chooser, ICMPActivity::class.java)
-                    startActivity(navigate)
-                }, shape = RoundedCornerShape(0.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
-                    Text(text = "ICMP", fontSize = 20.sp)
-                }
-                Button(onClick = {
-                    val navigate = Intent(this@Protocol_chooser, HTTPActivity::class.java)
-                    startActivity(navigate)
-                }, shape = RoundedCornerShape(0.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
-                    Text(text = "HTTP", fontSize = 20.sp)
-                }
-            }
-        }
-    }
-
-    @Composable
-    fun backgroundProtocol(){
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .background(Color.LightGray))
-        {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp) // Hauteur du rectangle
-                    .align(Alignment.TopCenter) // Alignement en haut
-                    .shadow( // Ajouter une ombre
-                        elevation = 8.dp, // Taille de l'ombre
-                        shape = RectangleShape, // Forme de l'ombre
-                        clip = true // Découpe le contenu à la forme de l'ombre
-                    )
-                    .background(color = Color.LightGray) // Couleur du rectangle
-            ) {
-                Text(text = "New Test",
-                    fontSize = 50.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                NavigationButton("UDP", UDPActivityUser::class)
+                NavigationButton("TCP", TPCActivity::class)
+                NavigationButton("ICMP", ICMPActivity::class)
+                NavigationButton("HTTP", HTTPActivity::class)
             }
         }
     }
