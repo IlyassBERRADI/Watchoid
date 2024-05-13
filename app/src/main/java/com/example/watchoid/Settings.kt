@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,17 +13,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -39,10 +31,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.watchoid.ui.theme.WatchoidTheme
+import com.example.watchoid.composant.DropDownMenu
 
 class Settings : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,7 +47,7 @@ class Settings : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun SettingsPage() {
-        var isExpanded by remember { mutableStateOf(false) }
+
         var isExpanded2 by remember { mutableStateOf(false) }
         var isExpanded3 by remember { mutableStateOf(false) }
         var type by remember { mutableStateOf("") }
@@ -72,68 +63,9 @@ class Settings : ComponentActivity() {
                     .padding(horizontal = 16.dp), // Espacement horizontal entre les boutons et le menu déroulant
                 horizontalArrangement = Arrangement.SpaceBetween // Espacement entre les boutons et le menu déroulant
             ) {
-                // Menu déroulant
-                ExposedDropdownMenuBox(
-                    expanded = isExpanded,
-                    onExpandedChange = { isExpanded = it },
-                    modifier = Modifier.weight(1f).padding(end = 8.dp)
-                ) {
-
-                    TextField(
-                        value = type,
-                        onValueChange = {
-                            type = it
-                        },
-                        readOnly = true,
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
-                        },
-                        colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                        modifier = Modifier.menuAnchor()
-                    )
-
-                    ExposedDropdownMenu(
-                        expanded = isExpanded,
-                        onDismissRequest = { isExpanded = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = {
-                                Text(text = "HTTP")
-                            },
-                            onClick = {
-                                type = "HTTP"
-                                isExpanded = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = {
-                                Text(text = "TCP")
-                            },
-                            onClick = {
-                                type = "TCP"
-                                isExpanded = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = {
-                                Text(text = "UDP")
-                            },
-                            onClick = {
-                                type = "UDP"
-                                isExpanded = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = {
-                                Text(text = "ICMP")
-                            },
-                            onClick = {
-                                type = "ICMP"
-                                isExpanded = false
-                            }
-                        )
-                    }
-                }
+                val items = listOf("HTTP", "UDP", "TCP", "ICMP")
+                var type by remember { mutableStateOf("HTTP") }
+                DropDownMenu(items, type);
 
                 // Menu déroulant
                 ExposedDropdownMenuBox(
