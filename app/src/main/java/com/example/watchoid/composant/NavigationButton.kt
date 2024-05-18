@@ -18,7 +18,7 @@ fun NavigationButton(text: String, destinationClass: KClass<*>, modifier: Modifi
     val context = LocalContext.current
     Button(onClick = {
         context.startActivity(Intent(context, destinationClass.java))
-    }, shape = RoundedCornerShape(0.dp),
+    }, shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
         Text(text = text, fontSize = 20.sp)
     }

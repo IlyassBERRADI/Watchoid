@@ -38,7 +38,7 @@ class Protocol_chooser : ComponentActivity() {
             ) {
                 NavigationButton("UDP", UDPActivityUser::class)
                 NavigationButton("TCP", TPCActivity::class)
-                NavigationButton("ICMP", ICMPActivity::class)
+                NavigationButton("ICMP", ICMPActivityUser::class)
                 NavigationButton("HTTP", HTTPActivity::class)
             }
         }
