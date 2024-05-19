@@ -54,14 +54,7 @@ class UDPActivityUser : ComponentActivity() {
             WatchoidTheme {
                 // A surface container using the 'background' color from the theme
                 Surface {
-                    Background(text = "UDP Test", main = false)
-                    var selectedType by remember { mutableStateOf("") }
-                    var userText by remember { mutableStateOf("") }
-                    DropdownMenuWithTextField(
-                        onValueChanged = { selectedType = it }, // Fournir une fonction lambda vide pour onValueChanged
-                        onTextChange = { userText = it }
-                    )
-                    UDPDemo(userText)
+                    UDPDemo()
                 }
             }
         }
@@ -69,17 +62,22 @@ class UDPActivityUser : ComponentActivity() {
 }
 
 @Composable
-fun UDPDemo(messageToSend: String) {
+fun UDPDemo() {
     var serverAddress by remember { mutableStateOf("") }
     var serverPort by remember { mutableStateOf("") }
     var snackbarVisible by remember { mutableStateOf(false) }
     var reponseDuServeur by remember { mutableStateOf("") }
-
+    var selectedType by remember { mutableStateOf("") }
+    var userText by remember { mutableStateOf("") }
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement = Arrangement.Bottom,
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally // Alignement horizontal au centre
     ) {
+        Background(text = "UDP Test", main = false)
+        DropdownMenuWithTextField(
+            onValueChanged = { selectedType = it }, // Fournir une fonction lambda vide pour onValueChanged
+            onTextChange = { userText = it }
+        )
         OutlinedTextField(
             value = serverAddress,
             onValueChange = { serverAddress = it },
@@ -93,7 +91,7 @@ fun UDPDemo(messageToSend: String) {
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
-                    Log.d("MessaageToSend", "MessageToSend : $messageToSend")
+                    Log.d("MessaageToSend", "MessageToSend : $userText")
                     Log.d("adresseServeur", "adresseServeur : $serverAddress")
                     Log.d("port", "port : $serverPort")
 
@@ -101,7 +99,7 @@ fun UDPDemo(messageToSend: String) {
                         try {
                             val socket = DatagramSocket()
                             val adresse = InetAddress.getByName(serverAddress)
-                            val data = messageToSend.toByteArray()
+                            val data = userText.toByteArray()
                             val packetEnvoye = DatagramPacket(data, data.size, adresse, serverPort.toIntOrNull() ?: 0)
                             Log.d("CreatePacket", "CreatePacket done")
                             socket.send(packetEnvoye)
@@ -150,7 +148,7 @@ fun DropdownMenuWithTextField(onValueChanged: (String) -> Unit, onTextChange: (S
     val textFieldValue = remember { mutableStateOf(TextFieldValue()) }
 
     Row(
-        modifier = Modifier.fillMaxSize().padding(bottom = 200.dp),
+        modifier = Modifier.padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
 

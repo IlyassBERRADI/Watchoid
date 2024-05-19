@@ -21,6 +21,7 @@ class TCPClient() {
             try {
                 socketChannel = SocketChannel.open()
                 var bool = socketChannel.connect(server)
+                Log.i("Server","Connected to server "+socketChannel.socket().remoteSocketAddress)
                 var requestBuffer = UTF8_CHARSET.encode(request)
                 var bufferInt = ByteBuffer.allocate(Int.SIZE_BYTES)
                 bufferInt.putInt(requestBuffer.remaining())

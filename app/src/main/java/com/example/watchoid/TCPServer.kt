@@ -16,10 +16,12 @@ import java.nio.charset.Charset
 class TCPServer {
     private val serverSocketChannel : ServerSocketChannel = ServerSocketChannel.open()
 
-    constructor(port : Int){
+    constructor(port : Int?){
         val serverSocket = serverSocketChannel.socket()
-        serverSocket.bind(InetSocketAddress(port))
-        Log.i("server", this.javaClass.name + " starts on port "+port)
+        if (port!=null){
+            serverSocket.bind(InetSocketAddress("127.0.0.1", port))
+            Log.i("server", this.javaClass.name + " starts on port "+port)
+        }
     }
 
     fun launch(){

@@ -27,7 +27,7 @@
             android:label="@string/title_activity_log"
             android:theme="@style/Theme.Watchoid" />
         <activity
-            android:name=".TPCActivity"
+            android:name=".TCPActivity"
             android:exported="false"
             android:label="@string/title_activity_tpcactivity"
             android:theme="@style/Theme.Watchoid" />

@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,54 +33,42 @@ import com.example.watchoid.Settings
 @Composable
 fun Background(text: String, main: Boolean,modifier: Modifier = Modifier){
     val context = LocalContext.current
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.LightGray)
+    Row(
+        modifier = Modifier.fillMaxWidth().height(80.dp).shadow( // Ajouter une ombre
+            elevation = 8.dp, // Taille de l'ombre
+            shape = RectangleShape, // Forme de l'ombre
+            clip = true // Découpe le contenu à la forme de l'ombre
+        ).background(color = Color.LightGray),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(80.dp) // Hauteur du rectangle
-                .align(Alignment.TopCenter) // Alignement en haut
-                .shadow( // Ajouter une ombre
-                    elevation = 8.dp, // Taille de l'ombre
-                    shape = RectangleShape, // Forme de l'ombre
-                    clip = true // Découpe le contenu à la forme de l'ombre
-                )
-                .background(color = Color.LightGray), // Couleur du rectangle
-            contentAlignment = Alignment.Center
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if(main){
-                    Image(
-                        painter = painterResource(id = R.drawable.notification),
-                        contentDescription = "Image 1",
-                        modifier = Modifier.size(32.dp).clickable {
-                            context.startActivity(Intent(context, Alert::class.java))
-                        }
-                    )
-                }
-                Text(
-                    text = text,
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                )
-                if (main){
-                    Image(
-                        painter = painterResource(id = R.drawable.parametres),
-                        contentDescription = "Image 2",
-                        modifier = Modifier.size(32.dp).clickable {
-                            context.startActivity(Intent(context, Settings::class.java))
-                        }
-                    )
-                }
-            }
+        if (main) {
+            Image(
+                painter = painterResource(id = R.drawable.notification),
+                contentDescription = "Image 1",
+                modifier = Modifier
+                    .size(32.dp)
+                    .clickable {
+                        context.startActivity(Intent(context, Alert::class.java))
+                    }
+            )
+        }
+        Text(
+            text = text,
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
+        if (main) {
+            Image(
+                painter = painterResource(id = R.drawable.parametres),
+                contentDescription = "Image 2",
+                modifier = Modifier
+                    .size(32.dp)
+                    .clickable {
+                        context.startActivity(Intent(context, Settings::class.java))
+                    }
+            )
         }
     }
 }
