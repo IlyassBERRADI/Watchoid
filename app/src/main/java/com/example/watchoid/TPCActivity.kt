@@ -16,12 +16,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,9 +36,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.watchoid.composant.Background
 import com.example.watchoid.ui.theme.WatchoidTheme
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.launch
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import java.net.InetSocketAddress
 
 class TPCActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,8 +54,11 @@ class TPCActivity : ComponentActivity() {
 
     @Composable
     fun TCPTest() {
+        var snackbarVisible by remember { mutableStateOf(false) }
+        var reponseDuServeur by remember { mutableStateOf("") }
         var serverAddress = "10.0.2.2"
         var serverPort = 7777
+        val coroutineScope = rememberCoroutineScope()
         var ping by remember { mutableStateOf(false) }
         Column(
             modifier = Modifier
@@ -58,7 +66,7 @@ class TPCActivity : ComponentActivity() {
                 .padding(16.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally // Alignement horizontal au centre
-        ) {Box(
+        ) {/*Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(300.dp) // Hauteur du rectangle
@@ -75,15 +83,26 @@ class TPCActivity : ComponentActivity() {
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
-        }
+        }*/
+            OutlinedTextField(
+                value = serverAddress,
+                onValueChange = { serverAddress = it },
+                label = { Text("Server Address") }
+            )
+            //OutlinedTextField(value = serverPort, onValueChange = { serverPort = 5 }, label = { Text("Server Port") })
+            /*OutlinedTextField(
+                value = serverPort,
+                onValueChange = { serverPort = it },
+                label = { Text("Server Port") }
+            )*/
 
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
-                    /*coroutineScope.launch(IO) {
+                    coroutineScope.launch(IO) {
                         var server = InetSocketAddress( 7777)
-                        text=TCPClient.getResponse("abc", server)
-                    }*/
+                        var text=TCPClient.getResponse("abc", server)
+                    }
                     Thread {
                         val timeout = 5000 // 5 seconds
                         val packetSize = 64 // ICMP packet size
