@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -59,6 +61,8 @@ class TPCActivity : ComponentActivity() {
         var serverAddress = "10.0.2.2"
         var serverPort = 7777
         val coroutineScope = rememberCoroutineScope()
+        val state = rememberScrollState()
+        var response by remember { mutableStateOf("") }
         var ping by remember { mutableStateOf(false) }
         Column(
             modifier = Modifier
@@ -84,6 +88,10 @@ class TPCActivity : ComponentActivity() {
                 )
             }
         }*/
+            Text(text = "Réponse")
+            Text(text = response, modifier = Modifier
+                .background(Color.Black)
+                .verticalScroll(state))
             OutlinedTextField(
                 value = serverAddress,
                 onValueChange = { serverAddress = it },
@@ -95,15 +103,18 @@ class TPCActivity : ComponentActivity() {
                 onValueChange = { serverPort = it },
                 label = { Text("Server Port") }
             )*/
-
+            OutlinedTextField(
+                value = serverPort.toString()
+                , onValueChange = { serverPort = it.toInt() },
+                label = { Text("Server Port") })
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
                     coroutineScope.launch(IO) {
-                        var server = InetSocketAddress( 7777)
-                        var text=TCPClient.getResponse("abc", server)
+                        var server = InetSocketAddress( serverPort)
+                        response=TCPClient.getResponse("abc", server)
                     }
-                    Thread {
+                    /*Thread {
                         val timeout = 5000 // 5 seconds
                         val packetSize = 64 // ICMP packet size
 
@@ -135,7 +146,7 @@ class TPCActivity : ComponentActivity() {
                             println("Error sending ping: ${e.message}")
                             ping = false
                         }
-                    }.start()
+                    }.start()*/
                 }
                 , shape = RoundedCornerShape(0.dp),
                 colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
