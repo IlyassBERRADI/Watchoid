@@ -80,7 +80,10 @@ class TPCActivity : ComponentActivity() {
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
-
+                    /*coroutineScope.launch(IO) {
+                        var server = InetSocketAddress( 7777)
+                        text=TCPClient.getResponse("abc", server)
+                    }*/
                     Thread {
                         val timeout = 5000 // 5 seconds
                         val packetSize = 64 // ICMP packet size
