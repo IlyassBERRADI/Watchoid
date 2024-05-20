@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,6 +56,7 @@ class HTTPActivity : ComponentActivity() {
 
     @Composable
     fun JsonTest(){
+        val coroutineScope = rememberCoroutineScope()
         var responseBody by remember { mutableStateOf("") }
         Column(
             modifier = Modifier
@@ -78,7 +80,7 @@ class HTTPActivity : ComponentActivity() {
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {val url = "https://dog.ceo/api/breeds/image/random"
-                    Thread {
+                    /*Thread {
                         val request = Request.Builder().url(url).build()
                         val client = OkHttpClient()
                         client.newCall(request).enqueue(object : Callback {
@@ -93,7 +95,10 @@ class HTTPActivity : ComponentActivity() {
                             }
                         })
 
-                    }.start()
+                    }.start()*/
+                    coroutineScope.launch(Dispatchers.IO) {
+                        responseBody = HTTPClient.getRequest()
+                    }
                 }
                 , shape = RoundedCornerShape(0.dp),
                 colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {

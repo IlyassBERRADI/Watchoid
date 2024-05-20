@@ -54,8 +54,8 @@ class TCPActivity : ComponentActivity() {
     fun TCPTest() {
         var snackbarVisible by remember { mutableStateOf(false) }
         var reponseDuServeur by remember { mutableStateOf("") }
-        var serverAddress by remember { mutableStateOf("") }
-        var serverPort by remember { mutableStateOf("") }
+        var serverAddress by remember { mutableStateOf("www.google.fr") }
+        var serverPort by remember { mutableStateOf("80") }
         val coroutineScope = rememberCoroutineScope()
         val state = rememberScrollState()
         val state2 = rememberScrollState()
@@ -65,13 +65,13 @@ class TCPActivity : ComponentActivity() {
         var serverLaunched by remember { mutableStateOf(false) }
         var data by remember { mutableStateOf<String?>(null) }
         var ping by remember { mutableStateOf(false) }
-        LaunchedEffect(serverLaunched) {
+        /*LaunchedEffect(serverLaunched) {
             if (serverLaunched){
                 withContext(IO) {
                     TCPServer(serverPort.toIntOrNull()).launch()
                 }
             }
-        }
+        }*/
 
         Column(
             modifier = Modifier

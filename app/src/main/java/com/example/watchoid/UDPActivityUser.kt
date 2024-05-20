@@ -146,6 +146,7 @@ fun DropdownMenuWithTextField(onValueChanged: (String) -> Unit, onTextChange: (S
     var isExpanded by remember { mutableStateOf(false) }
     var type by remember { mutableStateOf("") }
     val textFieldValue = remember { mutableStateOf(TextFieldValue()) }
+    var text by remember { mutableStateOf("GET / HTTP/1.1\\r\\nHost: www.google.fr\\r\\n\\r\\n") }
 
     Row(
         modifier = Modifier.padding(horizontal = 10.dp),
@@ -155,11 +156,12 @@ fun DropdownMenuWithTextField(onValueChanged: (String) -> Unit, onTextChange: (S
     ) {
         // Zone de texte
         OutlinedTextField(
-            value = textFieldValue.value,
+            /*value = textFieldValue.value,
             onValueChange = {
                 textFieldValue.value = it
                 onTextChange(it.text) // Appel de la fonction de rappel avec la nouvelle valeur du texte
-            },
+            }*/value = text,
+            onValueChange = { text = it },
             label = { Text("Entrez votre texte ici") },
         )
 
