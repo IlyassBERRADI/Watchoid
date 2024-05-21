@@ -81,14 +81,16 @@ class TCPActivity : ComponentActivity() {
         ) {
             Background(text = "TCP Test", main = false)
             Spacer(modifier = Modifier.height(30.dp))
-            DropdownMenuWithTextField(onValueChanged = { selectedType = it }, // Fournir une fonction lambda vide pour onValueChanged
+            DropdownMenuWithTextField(
+                listOf("Float", "Int", "String"),
+                label = "Entrez votre texte ici",
+                onValueChanged = { selectedType = it }, // Fournir une fonction lambda vide pour onValueChanged
                 onTextChange = { request = it })
             Spacer(modifier = Modifier.height(20.dp))
             Text(text = "Réponse :", modifier = Modifier
                 .align(Alignment.Start)
                 .padding(start = 28.dp))
             Box(
-                //contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .width(300.dp)
                     .height(100.dp)

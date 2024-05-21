@@ -39,7 +39,7 @@ class HTTPClient {
         fun requestGET(url : String) : String{
             var url = URL(url)
             var urlConnection = url.openConnection() as HttpURLConnection
-            var responseCode = urlConnection.responseCode
+            //var responseCode = urlConnection.responseCode
             //val data = urlConnection.inputStream.bufferedReader().readText()
             val data: String
             try {
@@ -54,16 +54,16 @@ class HTTPClient {
                 headers.forEach { (key, value) ->
                     println("$key: $value")
                 }*/
-                if (responseCode == HttpURLConnection.HTTP_OK) {
+                //if (responseCode == HttpURLConnection.HTTP_OK) {
                     urlConnection.inputStream.bufferedReader().use { reader ->
                         data = reader.readText()
                     }
                     return data
-                }
+                /*}
                 else{
                     Log.i("HTTP Response", "The response is not OK")
                     return ""
-                }
+                }*/
             } finally {
                 urlConnection.disconnect()
             }
@@ -71,7 +71,7 @@ class HTTPClient {
 
 
         fun findInText(pattern:String, input:String) : Boolean{
-            return Regex(pattern = pattern).matches(input)
+            return Regex(pattern = pattern).containsMatchIn(input)
         }
 
         fun findInHtml(tag:String, position: Int, content: String): Boolean{

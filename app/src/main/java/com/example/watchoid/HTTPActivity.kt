@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -23,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,36 +44,125 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.regex.Pattern
 import java.io.IOException
+import android.util.Log
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.mutableIntStateOf
 
 
 class HTTPActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Background(text = "HTTP Test", main = false)
-            JsonTest()
-            //HTTPTest()
+            HTTPTest()
         }
     }
 
 
     @Composable
-    fun JsonTest(){
+    fun HTTPTest(){
         val coroutineScope = rememberCoroutineScope()
         var responseBody by remember { mutableStateOf("") }
         val state = rememberScrollState()
+        val state2 = rememberScrollState()
+        var url by rememberSaveable { mutableStateOf("") }
+        var selectedType by remember { mutableStateOf("") }
+        var pattern by remember { mutableStateOf("") }
+        var tag by remember { mutableStateOf("") }
+        var position by remember { mutableIntStateOf(-1) }
+        var path by remember { mutableStateOf("") }
+        var value by remember { mutableStateOf("") }
+        var selectedType2 by remember { mutableStateOf("") }
+        var result: Boolean? by remember { mutableStateOf(null) }
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
+                .verticalScroll(state),
             horizontalAlignment = Alignment.CenterHorizontally // Alignement horizontal au centre
         ) {
+            Background(text = "HTTP Test", main = false)
+            Spacer(modifier = Modifier.height(30.dp))
+            DropdownMenuWithTextField(
+                listOf("Text", "Html", "JSON"),
+                label = "Entrez votre URL ici",
+                onValueChanged = { selectedType = it
+                                 Log.i("selectedType", selectedType)}, // Fournir une fonction lambda vide pour onValueChanged
+                onTextChange = { url = it })
+            Spacer(modifier = Modifier.height(20.dp))
+            //Log.i("selectedtype", selectedType)
+            /*if (selectedType=="Text"){
+                OutlinedTextField(
+                    value = pattern,
+                    onValueChange = { pattern = it },
+                    label = { Text("Pattern") }
+                )
+            }
+            else if (selectedType=="Html"){
+                OutlinedTextField(
+                    value = tag,
+                    onValueChange = { tag = it },
+                    label = { Text("Tag") }
+                )
+                OutlinedTextField(
+                    value = position.toString(),
+                    onValueChange = { position = it.toInt() },
+                    label = { Text("Position") }
+                )
+            }
+            else if (selectedType=="JSON"){
+                OutlinedTextField(
+                    value = path,
+                    onValueChange = { path = it },
+                    label = { Text("Path") }
+                )
+                DropdownMenuWithTextField(
+                    listOf("Int", "Long", "Double", "Boolean", "String"),
+                    label = "Entrez votre valeur ici",
+                    onValueChanged = { selectedType2 = it }, // Fournir une fonction lambda vide pour onValueChanged
+                    onTextChange = { value = it })
+            }*/
+            when (selectedType) {
+                "Text" -> {
+                    OutlinedTextField(
+                        value = pattern,
+                        onValueChange = { pattern = it },
+                        label = { Text("Pattern") }
+                    )
+                }
+                "Html" -> {
+                    OutlinedTextField(
+                        value = tag,
+                        onValueChange = { tag = it },
+                        label = { Text("Tag") }
+                    )
+                    OutlinedTextField(
+                        value = position.toString(),
+                        onValueChange = { position = it.toIntOrNull() ?: -1 },
+                        label = { Text("Position") }
+                    )
+                }
+                "JSON" -> {
+                    OutlinedTextField(
+                        value = path,
+                        onValueChange = { path = it },
+                        label = { Text("Path") }
+                    )
+                    DropdownMenuWithTextField(
+                        listOf("Int", "Long", "Double", "Boolean", "String"),
+                        label = "Entrez votre valeur ici",
+                        onValueChanged = { selectedType2 = it },
+                        onTextChange = { value = it }
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(text = "Réponse :", modifier = Modifier
+                .align(Alignment.Start)
+                .padding(start = 28.dp))
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp) // Hauteur du rectangle
-                    .verticalScroll(state)
+                    .width(300.dp)
+                    .height(100.dp) // Hauteur du rectangle
+                    .verticalScroll(state2)
                     .background(color = Color.White) // Couleur du rectangle
             ) {
                     Text(
@@ -79,10 +170,13 @@ class HTTPActivity : ComponentActivity() {
                         modifier = Modifier.align(Alignment.Center)
                     )
             }
-
+            Spacer(modifier = Modifier.height(16.dp))
+            if (result!=null){
+                Text(text = result.toString())
+            }
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = {val url = "https://dog.ceo/api/breeds/image/random"
+                onClick = {
                     /*Thread {
                         val request = Request.Builder().url(url).build()
                         val client = OkHttpClient()
@@ -101,6 +195,22 @@ class HTTPActivity : ComponentActivity() {
                     }.start()*/
                     coroutineScope.launch(Dispatchers.IO) {
                         responseBody = HTTPClient.requestGET(url)
+                        Log.i("pattern", pattern)
+                        result = when (selectedType) {
+                            "Text" -> HTTPClient.findInText(pattern, responseBody)
+                            "Html" -> HTTPClient.findInHtml(tag, position, responseBody)
+                            "JSON" -> HTTPClient.findInJSON(responseBody, path, value, selectedType2)
+                            else -> null
+                        }
+                        /*if (selectedType=="Text"){
+                            result = HTTPClient.findInText(pattern, responseBody)
+                        }
+                        else if (selectedType=="Html"){
+                            result = HTTPClient.findInHtml(tag, position, responseBody)
+                        }
+                        else if (selectedType=="JSON"){
+                            result = HTTPClient.findInJSON(responseBody, path, value, selectedType2)
+                        }*/
                     }
                 }
                 , shape = RoundedCornerShape(0.dp),
@@ -113,7 +223,7 @@ class HTTPActivity : ComponentActivity() {
     }
 
 
-    @Composable
+    /*@Composable
     fun HTTPTest() {
         var url = URL("https://www.google.com/")
         var response by remember { mutableStateOf(false) }
@@ -184,5 +294,5 @@ class HTTPActivity : ComponentActivity() {
                 Text("Envoyer")
             }
         }
-    }
+    }*/
 }

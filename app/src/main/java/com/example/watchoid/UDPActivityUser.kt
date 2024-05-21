@@ -75,6 +75,8 @@ fun UDPDemo() {
     ) {
         Background(text = "UDP Test", main = false)
         DropdownMenuWithTextField(
+            listOf("Float", "Int", "String"),
+            label = "Entrez votre texte ici",
             onValueChanged = { selectedType = it }, // Fournir une fonction lambda vide pour onValueChanged
             onTextChange = { userText = it }
         )
@@ -142,11 +144,11 @@ fun UDPDemo() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DropdownMenuWithTextField(onValueChanged: (String) -> Unit, onTextChange: (String) -> Unit) {
+fun DropdownMenuWithTextField(items: List<String>, label : String,onValueChanged: (String) -> Unit, onTextChange: (String) -> Unit) {
     var isExpanded by remember { mutableStateOf(false) }
     var type by remember { mutableStateOf("") }
     val textFieldValue = remember { mutableStateOf(TextFieldValue()) }
-    var text by remember { mutableStateOf("GET / HTTP/1.1\\r\\nHost: www.google.fr\\r\\n\\r\\n") }
+    var text by remember { mutableStateOf("") }
 
     Row(
         modifier = Modifier.padding(horizontal = 10.dp),
@@ -161,8 +163,10 @@ fun DropdownMenuWithTextField(onValueChanged: (String) -> Unit, onTextChange: (S
                 textFieldValue.value = it
                 onTextChange(it.text) // Appel de la fonction de rappel avec la nouvelle valeur du texte
             }*/value = text,
-            onValueChange = { text = it },
-            label = { Text("Entrez votre texte ici") },
+            onValueChange = {
+                text = it
+                onTextChange(it)},
+            label = { Text(label) },
         )
 
         // Menu déroulant
@@ -189,7 +193,19 @@ fun DropdownMenuWithTextField(onValueChanged: (String) -> Unit, onTextChange: (S
                 expanded = isExpanded,
                 onDismissRequest = { isExpanded = false }
             ) {
-                DropdownMenuItem(
+                for (item in items){
+                    DropdownMenuItem(
+                        text = {
+                            Text(text = item)
+                        },
+                        onClick = {
+                            type = item
+                            onValueChanged(item)
+                            isExpanded = false
+                        }
+                    )
+                }
+                /*DropdownMenuItem(
                     text = {
                         Text(text = "Float")
                     },
@@ -215,7 +231,7 @@ fun DropdownMenuWithTextField(onValueChanged: (String) -> Unit, onTextChange: (S
                         type = "String"
                         isExpanded = false
                     }
-                )
+                )*/
             }
         }
     }
