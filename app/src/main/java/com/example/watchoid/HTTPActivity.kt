@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -39,7 +41,6 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.regex.Pattern
-import okhttp3.*
 import java.io.IOException
 
 
@@ -58,6 +59,7 @@ class HTTPActivity : ComponentActivity() {
     fun JsonTest(){
         val coroutineScope = rememberCoroutineScope()
         var responseBody by remember { mutableStateOf("") }
+        val state = rememberScrollState()
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -69,6 +71,7 @@ class HTTPActivity : ComponentActivity() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(300.dp) // Hauteur du rectangle
+                    .verticalScroll(state)
                     .background(color = Color.White) // Couleur du rectangle
             ) {
                     Text(
@@ -97,7 +100,7 @@ class HTTPActivity : ComponentActivity() {
 
                     }.start()*/
                     coroutineScope.launch(Dispatchers.IO) {
-                        responseBody = HTTPClient.getRequest()
+                        responseBody = HTTPClient.requestGET(url)
                     }
                 }
                 , shape = RoundedCornerShape(0.dp),
