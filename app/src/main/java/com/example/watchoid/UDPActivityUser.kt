@@ -44,6 +44,7 @@ import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.DatagramChannel
 import java.nio.charset.Charset
+import android.util.Log
 
 
 class UDPActivityUser : ComponentActivity() {
@@ -146,6 +147,7 @@ fun UDPTest() {
         if (valueType.value == "String"){
             CheckBox(isChecked, "Mettre la taille de la string dans le buffer")
         }
+        Log.v("checked", isChecked.value.toString())
         // Dynamically added Rows
         rows.forEachIndexed { index, row ->
             Row(
@@ -171,6 +173,8 @@ fun UDPTest() {
             if (row.valueType.value == "String"){
                 CheckBox(row.isChecked, "Mettre la taille de la string dans le buffer")
             }
+            Log.v("checked row", row.isChecked.value.toString())
+
         }
 
         Button(
@@ -249,7 +253,9 @@ fun UDPTest() {
                             "Long" -> bb.putLong(value.value.toLong())
                             "Integer" -> bb.putInt(value.value.toInt())
                             "String" -> {
-                                bb.putInt(value.value.length)
+                                if(isChecked.value){
+                                    bb.putInt(value.value.length)
+                                }
                                 bb.put(Charset.forName(charset.value).encode(value.value))
                             }
                         }
@@ -279,7 +285,24 @@ fun UDPTest() {
                                 "Double" -> resultString.append(bb.getDouble())
                                 "Long" -> resultString.append(bb.getLong())
                                 "Integer" -> resultString.append(bb.getInt())
-                                "String" -> resultString.append(Charset.forName(result.charset.value).decode(bb))
+                                "String" -> {
+                                    // Lecture de la chaîne attendue
+                                    val length = result.value.value.length
+                                    val tmpbuffer = ByteBuffer.allocate(length)
+
+                                    // Limiter le buffer à la taille de la chaîne attendue
+                                    bb.limit(bb.position() + length)
+                                    tmpbuffer.put(bb)
+                                    tmpbuffer.flip()
+
+                                    // Décoder les bytes en chaîne de caractères avec le charset spécifié
+                                    val charset = Charset.forName(result.charset.value)
+                                    val message = charset.decode(tmpbuffer).toString()
+                                    resultString.append(message)
+
+                                    // Réinitialiser la limite du buffer
+                                    bb.limit(bb.capacity())
+                                }
                             }
                         }
                         println(resultString.toString())
