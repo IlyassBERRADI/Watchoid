@@ -43,9 +43,7 @@ import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.DatagramChannel
-
-
-
+import java.nio.charset.Charset
 
 
 class UDPActivityUser : ComponentActivity() {
@@ -250,7 +248,10 @@ fun UDPTest() {
                             "Double" -> bb.putDouble(value.value.toDouble())
                             "Long" -> bb.putLong(value.value.toLong())
                             "Integer" -> bb.putInt(value.value.toInt())
-                            "String" -> bb.putFloat(value.value.toFloat())
+                            "String" -> {
+                                bb.putInt(value.value.length)
+                                bb.put(Charset.forName(charset.value).encode(value.value))
+                            }
                         }
                         rows.forEachIndexed { index, row ->
                             when(row.valueType.value) {
@@ -258,7 +259,12 @@ fun UDPTest() {
                                 "Double" -> bb.putDouble(row.period.value.toDouble())
                                 "Long" -> bb.putLong(row.period.value.toLong())
                                 "Integer" -> bb.putInt(row.period.value.toInt())
-                                "String" -> bb.putFloat(row.period.value.toFloat())
+                                "String" -> {
+                                    if(row.isChecked.value){
+                                        bb.putInt(row.period.value.length)
+                                    }
+                                    bb.put(Charset.forName(row.charset.value).encode(row.period.value))
+                                }
                             }
                         }
                         bb.flip()
@@ -273,7 +279,7 @@ fun UDPTest() {
                                 "Double" -> resultString.append(bb.getDouble())
                                 "Long" -> resultString.append(bb.getLong())
                                 "Integer" -> resultString.append(bb.getInt())
-                                "String" -> resultString.append(bb.getInt())
+                                "String" -> resultString.append(Charset.forName(result.charset.value).decode(bb))
                             }
                         }
                         println(resultString.toString())
