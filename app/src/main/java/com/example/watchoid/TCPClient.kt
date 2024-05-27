@@ -23,46 +23,45 @@ class TCPClient() {
                 socketChannel = SocketChannel.open()
                 var bool = socketChannel.connect(server)
                 Log.i("Server","Connected to server "+socketChannel.socket().remoteSocketAddress)
-                /*var requestBuffer = UTF8_CHARSET.encode(request)
-                var bufferInt = ByteBuffer.allocate(Int.SIZE_BYTES)
-                bufferInt.putInt(requestBuffer.remaining())
-                bufferInt.flip()
-                socketChannel.write(bufferInt)*/
                 sentBuffer.flip()
-                //Log.i("sentBufferstring", UTF8_CHARSET.decode(sentBuffer).toString())
-                //Log.i("sentBuffer", sentBuffer.remaining().toString())
                 var bytesWritten = socketChannel.write(sentBuffer)
-                //bufferInt.clear()
                 if (closeInput){
-                    Log.i("yessir", "yessir")
                     socketChannel.socket().shutdownOutput()
                 }
-                var bufferResponse = ByteBuffer.allocate(BUFFER_SIZE)
+
+                var bufferResponse : ByteBuffer
+                when(typeResponse){
+                    "Double" -> bufferResponse = ByteBuffer.allocate(Double.SIZE_BYTES)
+                    "Int" -> bufferResponse = ByteBuffer.allocate(Int.SIZE_BYTES)
+                    "Long" -> bufferResponse = ByteBuffer.allocate(Long.SIZE_BYTES)
+                    else -> {
+                        bufferResponse = ByteBuffer.allocate(Int.SIZE_BYTES)
+                    }
+                }
                 var result : String
 
                 while (socketChannel.read(bufferResponse)!=-1){
                     if (!bufferResponse.hasRemaining()){
                         break
                     }
-                    /*Log.i("Server","Server stopped connection")
-                    return "";*/
                 }
                 bufferResponse.flip()
-                Log.i("bufferResponse", bufferResponse.remaining().toString())
-                /*var size = bufferInt.getInt()
-                var readBuffer = ByteBuffer.allocate(size)
 
-                if (!readFully(socketChannel, readBuffer)){
-                    Log.i("Error2","Client stopped connection")
-                    return "";
-                }
-                readBuffer.flip()*/
                 when(typeResponse){
                     "Double" -> result = bufferResponse.getDouble().toString()
                     "Int" -> result = bufferResponse.getInt().toString()
                     "Long" -> result = bufferResponse.getLong().toString()
                     else -> {
+                        var size = bufferResponse.getInt()
+                        bufferResponse = ByteBuffer.allocate(size)
+                        while (socketChannel.read(bufferResponse)!=-1){
+                            if (!bufferResponse.hasRemaining()){
+                                break
+                            }
+                        }
+                        bufferResponse.flip()
                         result = Charset.forName(typeResponse).decode(bufferResponse).toString()
+
                     }
                 }
                 return result

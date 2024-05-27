@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -71,9 +72,9 @@ class TCPActivity : ComponentActivity() {
     fun TCPTest() {
         var snackbarVisible by remember { mutableStateOf(false) }
         var reponseDuServeur by remember { mutableStateOf("") }
-        var serverAddress by remember { mutableStateOf("www.google.fr") }
+        var serverAddress by remember { mutableStateOf("") }
         var byteBuffer by remember { mutableStateOf<ByteBuffer>(ByteBuffer.allocate(1024)) }
-        var serverPort by remember { mutableStateOf("80") }
+        var serverPort by remember { mutableStateOf("") }
         val coroutineScope = rememberCoroutineScope()
         val state = rememberScrollState()
         val state2 = rememberScrollState()
@@ -87,6 +88,7 @@ class TCPActivity : ComponentActivity() {
         var listTypes by remember { mutableStateOf(mutableListOf<String>()) }
         var typeBufferResponse by remember { mutableStateOf("") }
         var closeInput by remember { mutableStateOf(false) }
+        //var sizeResponse by remember { mutableIntStateOf(-1) }
         var envoi by remember { mutableStateOf(false) }
         var selectedEncoding by remember { mutableStateOf("") }
         var selectedEncoding2 by remember { mutableStateOf("") }
@@ -164,6 +166,11 @@ class TCPActivity : ComponentActivity() {
                 .align(Alignment.Start)
                 .padding(start = 28.dp),
                 fontSize = 13.sp)
+            /*OutlinedTextField(
+                value = if(sizeResponse==-1) "" else sizeResponse.toString(),
+                onValueChange = { sizeResponse = it.toInt() },
+                label = { Text("Taille") }
+            )*/
             MyDropDownMenu("Type de réponse", listOf("Double", "Long", "Int", "String")) { selectedType2 = it }
             MyDropDownMenu("Encodage", listOf("UTF-8", "ASCII", "ISO-8859-1")) { selectedEncoding2 = it }
             Button(onClick = {
@@ -208,17 +215,26 @@ class TCPActivity : ComponentActivity() {
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
-                    /*if (!serverLaunched)
-                        serverLaunched=true*/
+                    if (!serverLaunched)
+                        serverLaunched=true
                     envoi = false
+
                     coroutineScope.launch(IO) {
-                        //var server = InetSocketAddress(serverAddress, serverPort.toInt())
+                        TCPServer(7777).launch()
+                    }
+
+                    coroutineScope.launch(IO) {
+                        var server = InetSocketAddress(serverAddress, serverPort.toInt())
                         //"www.google.fr", 80
-                        var server = InetSocketAddress("www.google.fr", 80)
-                        Log.i("closeIput", closeInput.toString())
-                        //response=TCPClient.getResponse(byteBuffer, server, closeInput, typeBufferResponse)
-                        response=TCPClientWeb.getResponse("GET / HTTP/1.1\\r\\nHost: www.google.fr\\r\\n\\r\\n", server)
-                        Log.i("response", response)
+                        /*var server = InetSocketAddress("www.google.fr", 80)
+                        Log.i("closeIput", closeInput.toString())*/
+                        response=TCPClient.getResponse(byteBuffer, server, closeInput, typeBufferResponse)
+                        //response=TCPClientWeb.getResponse("GET / HTTP/1.1\\r\\nHost: www.google.fr\\r\\n\\r\\n", server)
+                        //Log.i("response", response)
+                        //var server = InetSocketAddress("www.google.fr", 80)
+                        //Log.i("request", request)
+                        //response=TCPClientWeb.getResponse(request, server)
+                        //Log.i("text", text)
                     }
 
                     /*Thread {
