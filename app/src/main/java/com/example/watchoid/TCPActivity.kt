@@ -212,10 +212,13 @@ class TCPActivity : ComponentActivity() {
                         serverLaunched=true*/
                     envoi = false
                     coroutineScope.launch(IO) {
-                        var server = InetSocketAddress(serverAddress, serverPort.toInt())
+                        //var server = InetSocketAddress(serverAddress, serverPort.toInt())
+                        //"www.google.fr", 80
+                        var server = InetSocketAddress("www.google.fr", 80)
                         Log.i("closeIput", closeInput.toString())
                         //response=TCPClient.getResponse(byteBuffer, server, closeInput, typeBufferResponse)
                         response=TCPClientWeb.getResponse("GET / HTTP/1.1\\r\\nHost: www.google.fr\\r\\n\\r\\n", server)
+                        Log.i("response", response)
                     }
 
                     /*Thread {
