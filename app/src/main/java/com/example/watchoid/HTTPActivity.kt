@@ -135,7 +135,7 @@ class HTTPActivity : ComponentActivity() {
                         label = { Text("Tag") }
                     )
                     OutlinedTextField(
-                        value = position.toString(),
+                        value = if (position == -1) "" else position.toString(),
                         onValueChange = { position = it.toIntOrNull() ?: -1 },
                         label = { Text("Position") }
                     )

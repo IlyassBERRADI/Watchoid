@@ -144,12 +144,16 @@ fun UDPDemo() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DropdownMenuWithTextField(items: List<String>, label : String,onValueChanged: (String) -> Unit, onTextChange: (String) -> Unit) {
+fun DropdownMenuWithTextField(items: List<String>, label : String,onValueChanged: (String) -> Unit, onTextChange: (String) -> Unit, empty : Boolean = false,
+                              onEmptyChange : (Boolean) -> Unit ={}) {
     var isExpanded by remember { mutableStateOf(false) }
     var type by remember { mutableStateOf("") }
     val textFieldValue = remember { mutableStateOf(TextFieldValue()) }
     var text by remember { mutableStateOf("") }
-
+    if (empty){
+        text = ""
+        onEmptyChange(!empty)
+    }
     Row(
         modifier = Modifier.padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -158,11 +162,8 @@ fun DropdownMenuWithTextField(items: List<String>, label : String,onValueChanged
     ) {
         // Zone de texte
         OutlinedTextField(
-            /*value = textFieldValue.value,
-            onValueChange = {
-                textFieldValue.value = it
-                onTextChange(it.text) // Appel de la fonction de rappel avec la nouvelle valeur du texte
-            }*/value = text,
+            value = text,
+            modifier = Modifier.weight(0.7f),
             onValueChange = {
                 text = it
                 onTextChange(it)},
@@ -172,7 +173,8 @@ fun DropdownMenuWithTextField(items: List<String>, label : String,onValueChanged
         // Menu déroulant
         ExposedDropdownMenuBox(
             expanded = isExpanded,
-            onExpandedChange = { isExpanded = it }
+            onExpandedChange = { isExpanded = it },
+            modifier = Modifier.weight(0.3f)
         ) {
 
             TextField(
@@ -205,33 +207,6 @@ fun DropdownMenuWithTextField(items: List<String>, label : String,onValueChanged
                         }
                     )
                 }
-                /*DropdownMenuItem(
-                    text = {
-                        Text(text = "Float")
-                    },
-                    onClick = {
-                        type = "Float"
-                        isExpanded = false
-                    }
-                )
-                DropdownMenuItem(
-                    text = {
-                        Text(text = "Int")
-                    },
-                    onClick = {
-                        type = "Int"
-                        isExpanded = false
-                    }
-                )
-                DropdownMenuItem(
-                    text = {
-                        Text(text = "String")
-                    },
-                    onClick = {
-                        type = "String"
-                        isExpanded = false
-                    }
-                )*/
             }
         }
     }
