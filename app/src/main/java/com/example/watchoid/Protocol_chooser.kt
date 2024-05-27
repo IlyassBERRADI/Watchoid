@@ -37,7 +37,7 @@ class Protocol_chooser : ComponentActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 NavigationButton("UDP", UDPActivityUser::class)
-                NavigationButton("TCP", TPCActivity::class)
+                NavigationButton("TCP", TCPActivity::class)
                 NavigationButton("ICMP", ICMPActivityUser::class)
                 NavigationButton("HTTP", HTTPActivity::class)
             }
