@@ -43,7 +43,7 @@ class ICMPActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Background(text = "ICMP Test", main = false)
+
             ICMPDemo()
         }
     }
