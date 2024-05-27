@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,6 +44,13 @@ import java.nio.ByteBuffer
 import java.nio.channels.DatagramChannel
 import java.nio.charset.Charset
 import android.util.Log
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 
 
 class UDPActivityUser : ComponentActivity() {
@@ -325,3 +331,73 @@ fun UDPTest() {
     }
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DropdownMenuWithTextField(items: List<String>, label : String,onValueChanged: (String) -> Unit, onTextChange: (String) -> Unit, empty : Boolean = false,
+                              onEmptyChange : (Boolean) -> Unit ={}) {
+    var isExpanded by remember { mutableStateOf(false) }
+    var type by remember { mutableStateOf("") }
+    //val textFieldValue = remember { mutableStateOf(TextFieldValue()) }
+    var text by remember { mutableStateOf("") }
+    if (empty){
+        text = ""
+        onEmptyChange(!empty)
+    }
+    Row(
+        modifier = Modifier.padding(horizontal = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+
+    ) {
+        // Zone de texte
+        OutlinedTextField(
+            value = text,
+            modifier = Modifier.weight(0.7f),
+            onValueChange = {
+                text = it
+                onTextChange(it)},
+            label = { Text(label) },
+        )
+
+        // Menu dÃ©roulant
+        ExposedDropdownMenuBox(
+            expanded = isExpanded,
+            onExpandedChange = { isExpanded = it },
+            modifier = Modifier.weight(0.3f)
+        ) {
+
+            TextField(
+                value = type,
+                onValueChange = {
+                    type = it
+                    onValueChanged(it) // Appeler la fonction de rappel avec la nouvelle valeur
+                },
+                readOnly = true,
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
+                },
+                colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                modifier = Modifier.menuAnchor()
+            )
+
+            ExposedDropdownMenu(
+                expanded = isExpanded,
+                onDismissRequest = { isExpanded = false }
+            ) {
+                for (item in items){
+                    DropdownMenuItem(
+                        text = {
+                            Text(text = item)
+                        },
+                        onClick = {
+                            type = item
+                            onValueChanged(item)
+                            isExpanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
