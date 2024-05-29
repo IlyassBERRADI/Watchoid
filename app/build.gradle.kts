@@ -65,7 +65,6 @@ dependencies {
     implementation("org.jsoup:jsoup:1.17.2")
     implementation ("com.jayway.jsonpath:json-path:2.9.0")
     implementation ("com.squareup.okhttp3:okhttp:4.9.1")
-    implementation(libs.androidx.material3.android)
     kapt(libs.androidx.room.compiler)
     annotationProcessor(libs.androidx.room.compiler)
     testImplementation(libs.junit)
