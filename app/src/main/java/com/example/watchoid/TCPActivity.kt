@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import com.example.watchoid.composant.Background
+import com.example.watchoid.entity.TCPTest
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
@@ -229,6 +230,9 @@ class TCPActivity : ComponentActivity() {
                         /*var server = InetSocketAddress("www.google.fr", 80)
                         Log.i("closeIput", closeInput.toString())*/
                         response=TCPClient.getResponse(byteBuffer, server, closeInput, typeBufferResponse)
+                        var test = com.example.watchoid.entity.TCPTest(date = "100", dstIp = serverAddress, nbAlert = 10, nbPerio = 10L, periodicity = "Minutes", testAttendu = "", testResult = response)
+                        MainActivity.database.tcpTest().insert(test)
+
                         //response=TCPClientWeb.getResponse("GET / HTTP/1.1\\r\\nHost: www.google.fr\\r\\n\\r\\n", server)
                         //Log.i("response", response)
                         //var server = InetSocketAddress("www.google.fr", 80)

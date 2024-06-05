@@ -47,8 +47,6 @@ class MainActivity : ComponentActivity() {
                 "my_database"
             ).build()
             coroutine.launch {
-                val tcp = TCPTest(date = "20/10/10",sourceIp = "10.0.0.2", dstIp = "10.0.2.2", tpsRep = 30L, testAttendu = "Bonjour", testResult = "Bonjour", error = null, nbAlert = 2L, nbPerio = 5, periodicity = "Minutes" )
-                database.tcpTest().insert(tcp)
                 val newUser = User(username = "JohnDoe", email = "john@example.com")
                 database.userDao().insertUser(newUser)
             }

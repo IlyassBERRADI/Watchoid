@@ -202,6 +202,8 @@ class HTTPActivity : ComponentActivity() {
                             "JSON" -> HTTPClient.findInJSON(responseBody, path, value, selectedType2)
                             else -> null
                         }
+                        var test = com.example.watchoid.entity.HTTPTest(date = "10/12/2000", dstIp = url, nbPerio = 2, nbAlert = 10, periodicity = "Minutes", testAttendu = "", testResult = result.toString(), testType = selectedType)
+                        MainActivity.database.http_test().insert(test)
                         /*if (selectedType=="Text"){
                             result = HTTPClient.findInText(pattern, responseBody)
                         }
@@ -211,6 +213,7 @@ class HTTPActivity : ComponentActivity() {
                         else if (selectedType=="JSON"){
                             result = HTTPClient.findInJSON(responseBody, path, value, selectedType2)
                         }*/
+
                     }
                 }
                 , shape = RoundedCornerShape(0.dp),
