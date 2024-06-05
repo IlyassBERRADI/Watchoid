@@ -53,7 +53,7 @@ class TCPClient() {
                     "Long" -> result = bufferResponse.getLong().toString()
                     else -> {
                         var size = bufferResponse.getInt()
-                        bufferResponse = ByteBuffer.allocate(size)
+                        bufferResponse = ByteBuffer.allocate(/*size*/10000)
                         while (socketChannel.read(bufferResponse)!=-1){
                             if (!bufferResponse.hasRemaining()){
                                 break
