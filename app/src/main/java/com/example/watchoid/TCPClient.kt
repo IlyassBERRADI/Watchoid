@@ -17,7 +17,7 @@ class TCPClient() {
 
 
         @Throws(IOException::class)
-        fun getResponse(sentBuffer : ByteBuffer, server : SocketAddress, closeInput : Boolean, typeResponse : String) : String {
+        fun getResponse(sentBuffer : ByteBuffer, server : SocketAddress, closeInput : Boolean, typeResponse : String, sizeBuffer:Int?) : String {
             var socketChannel: SocketChannel? = null
             try {
                 socketChannel = SocketChannel.open()
@@ -52,8 +52,13 @@ class TCPClient() {
                     "Int" -> result = bufferResponse.getInt().toString()
                     "Long" -> result = bufferResponse.getLong().toString()
                     else -> {
-                        var size = bufferResponse.getInt()
-                        bufferResponse = ByteBuffer.allocate(/*size*/10000)
+
+                        if (sizeBuffer==null){
+                            var size = bufferResponse.getInt()
+                            bufferResponse = ByteBuffer.allocate(size)
+                        }
+                        else
+                            bufferResponse = ByteBuffer.allocate(sizeBuffer)
                         while (socketChannel.read(bufferResponse)!=-1){
                             if (!bufferResponse.hasRemaining()){
                                 break

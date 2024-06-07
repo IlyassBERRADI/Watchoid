@@ -75,6 +75,7 @@ class TCPActivity : ComponentActivity() {
         var serverAddress by remember { mutableStateOf("") }
         var byteBuffer by remember { mutableStateOf<ByteBuffer>(ByteBuffer.allocate(1024)) }
         var serverPort by remember { mutableStateOf("") }
+        var sizeBufferResponse: Int? by remember { mutableStateOf(null) }
         val coroutineScope = rememberCoroutineScope()
         val state = rememberScrollState()
         val state2 = rememberScrollState()
@@ -173,6 +174,11 @@ class TCPActivity : ComponentActivity() {
             )*/
             MyDropDownMenu("Type de réponse", listOf("Double", "Long", "Int", "String")) { selectedType2 = it }
             MyDropDownMenu("Encodage", listOf("UTF-8", "ASCII", "ISO-8859-1")) { selectedEncoding2 = it }
+            OutlinedTextField(
+                value = if(sizeBufferResponse==null) "" else sizeBufferResponse.toString(),
+                onValueChange = { sizeBufferResponse = if(it=="") null else it.toInt()   },
+                label = { Text("Size") }
+            )
             Button(onClick = {
                 if (selectedType2 == "String"){
                    typeBufferResponse = selectedEncoding2
@@ -228,7 +234,7 @@ class TCPActivity : ComponentActivity() {
                         //"www.google.fr", 80
                         /*var server = InetSocketAddress("www.google.fr", 80)
                         Log.i("closeIput", closeInput.toString())*/
-                        response=TCPClient.getResponse(byteBuffer, server, closeInput, typeBufferResponse)
+                        response=TCPClient.getResponse(byteBuffer, server, closeInput, typeBufferResponse, sizeBufferResponse)
                         //response=TCPClientWeb.getResponse("GET / HTTP/1.1\\r\\nHost: www.google.fr\\r\\n\\r\\n", server)
                         //Log.i("response", response)
                         //var server = InetSocketAddress("www.google.fr", 80)
