@@ -68,7 +68,7 @@ class Log : ComponentActivity() {
             }
             Button(onClick = {
                 CoroutineScope(IO).launch {
-                    var udp = MainActivity.database.udpTest()
+                    var udp = MainActivity.database.tcpTest()
                     selectedOption.value = "TCP"
                     val tableName = "tcp_tests"
                     val query = selectAllFrom(tableName)
@@ -92,7 +92,7 @@ class Log : ComponentActivity() {
             }
             Button(onClick = {
                 CoroutineScope(IO).launch {
-                    var udp = MainActivity.database.udpTest()
+                    var udp = MainActivity.database.http_test()
                     selectedOption.value = "HTTP"
                     val tableName = "http_tests"
                     val query = selectAllFrom(tableName)
