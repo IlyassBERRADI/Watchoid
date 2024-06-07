@@ -8,6 +8,7 @@ import java.io.IOException
 import java.net.SocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.SocketChannel
+import java.nio.channels.UnresolvedAddressException
 import java.nio.charset.Charset
 
 class TCPClient() {
@@ -16,7 +17,7 @@ class TCPClient() {
         private const val BUFFER_SIZE = 1024
 
 
-        @Throws(IOException::class)
+        @Throws(IOException::class, UnresolvedAddressException::class)
         fun getResponse(sentBuffer : ByteBuffer, server : SocketAddress, closeInput : Boolean, typeResponse : String, sizeBuffer:Int?) : String {
             var socketChannel: SocketChannel? = null
             try {

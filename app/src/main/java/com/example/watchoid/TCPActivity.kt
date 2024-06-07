@@ -54,10 +54,14 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import com.example.watchoid.composant.Background
 import com.example.watchoid.entity.Alerts
 import com.example.watchoid.entity.TCPTest
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
+import java.nio.channels.UnresolvedAddressException
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 
@@ -91,7 +95,7 @@ class TCPActivity : ComponentActivity() {
         var response by remember { mutableStateOf("") }
         var selectedType by remember { mutableStateOf("") }
         var selectedType2 by remember { mutableStateOf("") }
-        var serverLaunched by remember { mutableStateOf(false) }
+        //var serverLaunched by remember { mutableStateOf(false) }
         var listTypes by remember { mutableStateOf(mutableListOf<String>()) }
         var typeBufferResponse by remember { mutableStateOf("") }
         var closeInput by remember { mutableStateOf(false) }
@@ -227,13 +231,13 @@ class TCPActivity : ComponentActivity() {
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
-                    if (!serverLaunched)
-                        serverLaunched=true
+                    /*if (!serverLaunched)
+                        serverLaunched=true*/
                     envoi = false
 
-                    coroutineScope.launch(IO) {
+                    /*coroutineScope.launch(IO) {
                         TCPServer(7777).launch()
-                    }
+                    }*/
 
                     coroutineScope.launch(IO) {
                         var server = InetSocketAddress(serverAddress, serverPort.toInt())
@@ -241,7 +245,16 @@ class TCPActivity : ComponentActivity() {
                         /*var server = InetSocketAddress("www.google.fr", 80)
                         Log.i("closeIput", closeInput.toString())*/
 
-                        response=TCPClient.getResponse(byteBuffer, server, closeInput, typeBufferResponse, sizeBufferResponse)
+                        try {
+                            response=TCPClient.getResponse(byteBuffer, server, closeInput, typeBufferResponse, sizeBufferResponse)
+                        } catch (e : IOException){
+                            response = "Echec de test"
+                        } catch (e : UnresolvedAddressException){
+                            withContext(Dispatchers.Main){
+                                Toast.makeText(context, "Adresse non connu!", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+
                         var test = com.example.watchoid.entity.TCPTest(date = "100", dstIp = serverAddress, nbPerio = 10L, periodicity = "Minutes", testAttendu = "true", testResult = response)
                         MainActivity.database.tcpTest().insert(test)
                         val query = selectAllFrom("tcp_tests")
