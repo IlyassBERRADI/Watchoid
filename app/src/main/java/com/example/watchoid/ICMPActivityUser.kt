@@ -1,6 +1,7 @@
 package com.example.watchoid
 
 import android.R.attr.host
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -169,6 +170,7 @@ class ICMPActivityUser : ComponentActivity() {
     }
     fun selectAllFrom(tableName: String) = SimpleSQLiteQuery("SELECT * FROM $tableName")
 
+    @SuppressLint("CoroutineCreationDuringComposition")
     @Composable
     fun ICMP() {
         var serverAddress = remember { mutableStateOf("") }
@@ -187,6 +189,7 @@ class ICMPActivityUser : ComponentActivity() {
         var avgTime = remember { mutableStateOf<Double?>(0.0) }
         var minTime = remember { mutableStateOf<Double?>(0.0) }
         var coroutine = rememberCoroutineScope();
+        var coroutineAlert = rememberCoroutineScope();
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -216,6 +219,7 @@ class ICMPActivityUser : ComponentActivity() {
                 Box(modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.White)){
+
                     if (ping == expectedResult.value) {
                         println(ping)
                         println(expectedResult.value)
@@ -224,6 +228,12 @@ class ICMPActivityUser : ComponentActivity() {
                     if(abovePacketTime.value == "false"){
                         println(abovePacketTime)
                         Text("Le test est passer !", Modifier.align(Alignment.Center))
+                    }
+                    coroutineAlert.launch(IO) {
+                        val query = selectAllFrom("icmp_tests")
+                        var id = MainActivity.database.icmpTest()
+                        var list = id.getAllTests(query)
+                        MainActivity.database.alerts().incrementNbError(list.size, "ICMP")
                     }
                 }
             }
@@ -268,18 +278,24 @@ class ICMPActivityUser : ComponentActivity() {
                         }
 
                         if(testChoosen.value == "Server availability"){
-                            var test = ICMPTest(date = "10/10/2020", dstIp = serverAddress.value, nbPerio = period.value.toLong(), nbAlert = 2, periodicity =  unitTime.value, testAttendu = expectedResult.value, testResult = ping, testType =  testChoosen.value, tpsAvg = avgTime.value, tpsMax = maxTime.value, tpsMin = minTime.value)
+                            var test = ICMPTest(date = "10/10/2020", dstIp = serverAddress.value, nbPerio = period.value.toLong(), periodicity =  unitTime.value, testAttendu = expectedResult.value, testResult = ping, testType =  testChoosen.value, tpsAvg = avgTime.value, tpsMax = maxTime.value, tpsMin = minTime.value)
                             MainActivity.database.icmpTest().insert(test)
                             val query = selectAllFrom("icmp_tests")
-                            var id = MainActivity.database.udpTest()
+                            var id = MainActivity.database.icmpTest()
 
                             var list = id.getAllTests(query)
                             var alert = Alerts(idTest = list.size, testType = "ICMP", nbError = 0)
                             MainActivity.database.alerts().insert(alert)
 
                         } else if(testChoosen.value == "Response time"){
-                            var test = ICMPTest(date = "10/10/2020", dstIp = serverAddress.value, nbPerio = period.value.toLong(), nbAlert = 2, periodicity =  unitTime.value, testAttendu = packetTime.value, testResult =  maxTime.value.toString(), testType = testChoosen.value, tpsAvg = avgTime.value, tpsMax = maxTime.value, tpsMin = minTime.value)
+                            var test = ICMPTest(date = "10/10/2020", dstIp = serverAddress.value, nbPerio = period.value.toLong(), periodicity =  unitTime.value, testAttendu = packetTime.value, testResult =  maxTime.value.toString(), testType = testChoosen.value, tpsAvg = avgTime.value, tpsMax = maxTime.value, tpsMin = minTime.value)
                             MainActivity.database.icmpTest().insert(test)
+                            val query = selectAllFrom("icmp_tests")
+                            var id = MainActivity.database.icmpTest()
+
+                            var list = id.getAllTests(query)
+                            var alert = Alerts(idTest = list.size, testType = "ICMP", nbError = 0)
+                            MainActivity.database.alerts().insert(alert)
                         }
 
                     }

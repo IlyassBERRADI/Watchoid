@@ -47,6 +47,8 @@ import java.io.IOException
 import android.util.Log
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.sqlite.db.SimpleSQLiteQuery
+import com.example.watchoid.entity.Alerts
 
 
 class HTTPActivity : ComponentActivity() {
@@ -56,6 +58,8 @@ class HTTPActivity : ComponentActivity() {
             HTTPTest()
         }
     }
+
+    fun selectAllFrom(tableName: String) = SimpleSQLiteQuery("SELECT * FROM $tableName")
 
 
     @Composable
@@ -202,8 +206,14 @@ class HTTPActivity : ComponentActivity() {
                             "JSON" -> HTTPClient.findInJSON(responseBody, path, value, selectedType2)
                             else -> null
                         }
-                        var test = com.example.watchoid.entity.HTTPTest(date = "10/12/2000", dstIp = url, nbPerio = 2, nbAlert = 10, periodicity = "Minutes", testAttendu = "", testResult = result.toString(), testType = selectedType)
+                        var test = com.example.watchoid.entity.HTTPTest(date = "10/12/2000", dstIp = url, nbPerio = 2, periodicity = "Minutes", testAttendu = "true", testResult = result.toString(), testType = selectedType)
                         MainActivity.database.http_test().insert(test)
+                        val query = selectAllFrom("http_tests")
+                        var id = MainActivity.database.http_test()
+
+                        var list = id.getAllTests(query)
+                        var alert = Alerts(idTest = list.size, testType = "HTTP", nbError = 0)
+                        MainActivity.database.alerts().insert(alert)
                         /*if (selectedType=="Text"){
                             result = HTTPClient.findInText(pattern, responseBody)
                         }

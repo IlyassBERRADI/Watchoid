@@ -4,8 +4,12 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Update
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.example.watchoid.entity.HTTPTest
+import com.example.watchoid.entity.ICMPTest
+
 @Dao
 interface HTTPTestDAO {
     @Insert
@@ -17,8 +21,8 @@ interface HTTPTestDAO {
     @Delete
     suspend fun delete(httpTest: HTTPTest)
 
-    /*@Query("SELECT * FROM http_tests")
-    suspend fun getAllTests(): List<HTTPTest>*/
+    @RawQuery
+    suspend fun getAllTests(query: SupportSQLiteQuery): List<HTTPTest>
 
     @Query("SELECT * FROM http_tests WHERE id_test = :id LIMIT 1")
     suspend fun getTestById(id: Int): HTTPTest?

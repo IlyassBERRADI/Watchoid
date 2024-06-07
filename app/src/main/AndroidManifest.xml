@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -16,6 +17,11 @@
         android:theme="@style/Theme.Watchoid"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".TapTap"
+            android:exported="false"
+            android:label="@string/title_activity_tap_tap"
+            android:theme="@style/Theme.Watchoid" />
         <activity
             android:name=".Alert"
             android:exported="false"

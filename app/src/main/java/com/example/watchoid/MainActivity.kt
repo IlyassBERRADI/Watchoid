@@ -16,6 +16,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.watchoid.composant.Background
 import com.example.watchoid.composant.NavigationButton
+import com.example.watchoid.entity.Settings
 import com.example.watchoid.entity.TCPTest
 import com.example.watchoid.entity.User
 import kotlinx.coroutines.launch
@@ -47,6 +48,14 @@ class MainActivity : ComponentActivity() {
                 "my_database"
             ).build()
             coroutine.launch {
+                var list = listOf(
+                    Settings(testType = "ICMP", nbError = 10),
+                    Settings(testType = "TCP", nbError = 10),
+                    Settings(testType = "UDP", nbError = 10),
+                    Settings(testType = "HTTP", nbError = 10))
+                list.forEach {
+                    database.settingsTable().insert(it)
+                }
                 val newUser = User(username = "JohnDoe", email = "john@example.com")
                 database.userDao().insertUser(newUser)
             }

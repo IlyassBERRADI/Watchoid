@@ -51,6 +51,8 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.sqlite.db.SimpleSQLiteQuery
+import com.example.watchoid.entity.Alerts
 import com.example.watchoid.entity.UDPTest
 import kotlinx.coroutines.Dispatchers.IO
 
@@ -105,6 +107,8 @@ class UDPActivityUser : ComponentActivity() {
             }
         }
     }
+
+    fun selectAllFrom(tableName: String) = SimpleSQLiteQuery("SELECT * FROM $tableName")
 
     @RequiresApi(Build.VERSION_CODES.N)
     @Composable
@@ -314,8 +318,15 @@ class UDPActivityUser : ComponentActivity() {
                             }
                             println(resultString.toString())
                             result.value = resultString.toString()
-                            var test = com.example.watchoid.entity.UDPTest(date = "100", dstIp = serverAddress.value, nbAlert = 2, nbPerio = period.value.toLong(), periodicity = unitTime.value, testAttendu = resultString.toString(), testResult = result.value)
+                            var test = com.example.watchoid.entity.UDPTest(date = "100", dstIp = serverAddress.value, nbPerio = period.value.toLong(), periodicity = unitTime.value, testAttendu = resultString.toString(), testResult = result.value)
                             MainActivity.database.udpTest().insert(test)
+
+                            val query = selectAllFrom("udp_tests")
+                            var id = MainActivity.database.udpTest()
+
+                            var list = id.getAllTests(query)
+                            var alert = Alerts(idTest = list.size, testType = "UDP", nbError = 0)
+                            MainActivity.database.alerts().insert(alert)
 
                         } catch (e: Exception) {
                             e.printStackTrace()
