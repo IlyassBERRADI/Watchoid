@@ -8,4 +8,5 @@
     <string name="title_activity_tpcactivity">TPCActivity</string>
     <string name="title_activity_log">Log</string>
     <string name="title_activity_alert">Alert</string>
+    <string name="title_activity_tap_tap">TapTap</string>
 </resources>

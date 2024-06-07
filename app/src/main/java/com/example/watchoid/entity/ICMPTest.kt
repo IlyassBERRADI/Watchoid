@@ -18,6 +18,5 @@ data class ICMPTest(
     @ColumnInfo(name = "test_result") val testResult: String,
     @ColumnInfo(name = "test_attendu") val testAttendu: String,
     @ColumnInfo(name = "nb_perio") val nbPerio: Long,
-    @ColumnInfo(name = "periodicity") val periodicity: String,
-    @ColumnInfo(name = "nb_alert") val nbAlert: Long
+    @ColumnInfo(name = "periodicity") val periodicity: String
 )
