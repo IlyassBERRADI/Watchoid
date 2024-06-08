@@ -33,6 +33,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = "1.8"
@@ -65,6 +66,18 @@ dependencies {
     implementation("org.jsoup:jsoup:1.17.2")
     implementation ("com.jayway.jsonpath:json-path:2.9.0")
     implementation ("com.squareup.okhttp3:okhttp:4.9.1")
+
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.8.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.0")
+
+    implementation ("androidx.compose.runtime:runtime-livedata:1.6.7")
+
+    coreLibraryDesugaring ("com.android.tools:desugar_jdk_libs:2.0.4")
+
     kapt(libs.androidx.room.compiler)
     annotationProcessor(libs.androidx.room.compiler)
     testImplementation(libs.junit)

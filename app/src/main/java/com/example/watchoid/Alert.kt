@@ -209,7 +209,7 @@ fun DisplayTests() {
         tcpTests.forEach { test ->
             val annotatedString = buildAnnotatedString {
                 withStyle(style = SpanStyle(fontSize = 20.sp)) {
-                    append("Test ID : ${test.id_test}, Result : ${test.testResult}")
+                    append("Test ID : ${test.idTest}, Request : ${test.request}")
                 }
             }
             Text(text = annotatedString)

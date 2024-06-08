@@ -24,9 +24,10 @@ import androidx.compose.runtime.MutableState
 fun DropDownMenu(
     items: List<String>,
     type: MutableState<String>,
-
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onValueChange : (String)->Unit = {}
 ){
+    var active by remember { mutableStateOf(false) }
     var isExpanded by remember { mutableStateOf(false) }
     // Menu déroulant
     ExposedDropdownMenuBox(
@@ -39,7 +40,7 @@ fun DropDownMenu(
             value = type.value,
             onValueChange = { },
             readOnly = true,
-            enabled = false,
+            enabled = active,
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
             },
@@ -61,6 +62,8 @@ fun DropDownMenu(
                     onClick = {
                         type.value = item
                         isExpanded = false
+                        active = true
+                        onValueChange(item)
                     }
                 )
             }

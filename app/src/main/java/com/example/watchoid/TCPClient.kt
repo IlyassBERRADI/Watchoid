@@ -1,9 +1,8 @@
 package com.example.watchoid
 
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
+import androidx.sqlite.db.SimpleSQLiteQuery
 import java.io.IOException
 import java.net.SocketAddress
 import java.nio.ByteBuffer
@@ -18,7 +17,7 @@ class TCPClient() {
 
 
         @Throws(IOException::class, UnresolvedAddressException::class)
-        fun getResponse(sentBuffer : ByteBuffer, server : SocketAddress, closeInput : Boolean, typeResponse : String, sizeBuffer:Int?) : String {
+        fun getResponse(sentBuffer : ByteBuffer, server : SocketAddress, closeInput : Boolean, outEncoding : String, sizeBuffer:Int?) : String {
             var socketChannel: SocketChannel? = null
             try {
                 socketChannel = SocketChannel.open()
@@ -31,7 +30,7 @@ class TCPClient() {
                 }
 
                 var bufferResponse : ByteBuffer
-                when(typeResponse){
+                when(outEncoding){
                     "Double" -> bufferResponse = ByteBuffer.allocate(Double.SIZE_BYTES)
                     "Int" -> bufferResponse = ByteBuffer.allocate(Int.SIZE_BYTES)
                     "Long" -> bufferResponse = ByteBuffer.allocate(Long.SIZE_BYTES)
@@ -48,7 +47,7 @@ class TCPClient() {
                 }
                 bufferResponse.flip()
 
-                when(typeResponse){
+                when(outEncoding){
                     "Double" -> result = bufferResponse.getDouble().toString()
                     "Int" -> result = bufferResponse.getInt().toString()
                     "Long" -> result = bufferResponse.getLong().toString()
@@ -66,7 +65,7 @@ class TCPClient() {
                             }
                         }
                         bufferResponse.flip()
-                        result = Charset.forName(typeResponse).decode(bufferResponse).toString()
+                        result = Charset.forName(outEncoding).decode(bufferResponse).toString()
 
                     }
                 }
@@ -75,6 +74,11 @@ class TCPClient() {
                 socketChannel?.close()
             }
         }
+
+
+
+
+        private fun selectAllFrom(tableName: String) = SimpleSQLiteQuery("SELECT * FROM $tableName")
 
         @Throws(IOException::class)
         private fun readFully(socketChannel : SocketChannel, buffer : ByteBuffer) : Boolean{

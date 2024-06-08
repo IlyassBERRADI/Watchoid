@@ -1,9 +1,7 @@
 package com.example.watchoid
 
-import android.R.attr.host
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -41,7 +39,6 @@ import com.example.watchoid.composant.InputTextField
 import com.example.watchoid.composant.InputTextFieldNumber
 import com.example.watchoid.entity.Alerts
 import com.example.watchoid.entity.ICMPTest
-import com.example.watchoid.entity.UDPTest
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import java.io.BufferedReader

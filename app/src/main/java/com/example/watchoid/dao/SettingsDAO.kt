@@ -23,8 +23,11 @@ interface SettingsDAO {
     suspend fun delete(settings: Settings)
 
     @Query("SELECT * FROM settings")
-    suspend fun getAllTests(): List<Settings>
+    suspend fun getAllSettings(): List<Settings>
 
-    @Query("SELECT nb_error FROM settings WHERE test_type = :protocol")
+    @Query("SELECT * FROM settings WHERE protocol = :protocol")
+    suspend fun getSettingByProtocol(protocol: String): Settings?
+
+    @Query("SELECT nb_error FROM settings WHERE protocol = :protocol")
     suspend fun getNbAlertByProtocol(protocol: String): Int
 }

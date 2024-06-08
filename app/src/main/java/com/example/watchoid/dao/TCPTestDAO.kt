@@ -23,6 +23,6 @@ interface TCPTestDAO {
     @RawQuery
     suspend fun getAllTests(query: SupportSQLiteQuery): List<TCPTest>
 
-    @Query("SELECT * FROM tcp_tests WHERE id_test = :id LIMIT 1")
+    @Query("SELECT * FROM tcp_tests WHERE idTest = :id")
     suspend fun getTestById(id: Int): TCPTest?
 }

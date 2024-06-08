@@ -1,8 +1,18 @@
 package com.example.watchoid
 
+import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.NetworkInfo
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -15,7 +25,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,7 +43,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -50,20 +58,25 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.example.watchoid.composant.Background
 import com.example.watchoid.entity.Alerts
-import com.example.watchoid.entity.TCPTest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
+import java.nio.channels.SocketChannel
 import java.nio.channels.UnresolvedAddressException
 import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
+import java.time.LocalDateTime
+
 
 class TCPActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,10 +104,17 @@ class TCPActivity : ComponentActivity() {
         val state2 = rememberScrollState()
         var empty by remember { mutableStateOf(false) }
         var addSize by remember { mutableStateOf(false) }
+        var connectedToNetwork by remember { mutableStateOf(false) }
         var request by remember { mutableStateOf("") }
         var response by remember { mutableStateOf("") }
         var selectedType by remember { mutableStateOf("") }
         var selectedType2 by remember { mutableStateOf("") }
+        var result by remember {
+            mutableStateOf(false)
+        }
+        var resultText by remember {
+            mutableStateOf("")
+        }
         //var serverLaunched by remember { mutableStateOf(false) }
         var listTypes by remember { mutableStateOf(mutableListOf<String>()) }
         var typeBufferResponse by remember { mutableStateOf("") }
@@ -103,6 +123,10 @@ class TCPActivity : ComponentActivity() {
         var envoi by remember { mutableStateOf(false) }
         var selectedEncoding by remember { mutableStateOf("") }
         var selectedEncoding2 by remember { mutableStateOf("") }
+        var waitedResponse by remember {
+            mutableStateOf("")
+        }
+
         var data by remember { mutableStateOf<String?>(null) }
         var ping by remember { mutableStateOf(false) }
         /*LaunchedEffect(serverLaunched) {
@@ -127,7 +151,7 @@ class TCPActivity : ComponentActivity() {
                 label = "Entrez votre texte ici",
                 onValueChanged = { selectedType = it }, // Fournir une fonction lambda vide pour onValueChanged
                 onTextChange = { request = it },
-                empty = empty,
+                //empty = false,
                 onEmptyChange = {empty = it})
             Spacer(modifier = Modifier.height(20.dp))
             MyCheckBox("Mettre la taille avant la chaîne encodée") { addSize = it }
@@ -164,7 +188,8 @@ class TCPActivity : ComponentActivity() {
                         byteBuffer.put(stringBuffer)
                     }
                 }
-                empty = true
+                //empty = true
+                Toast.makeText(context, "Texte ajouté au buffer", Toast.LENGTH_SHORT).show()
             }) {
                 Text("Ajouter au buffer d'envoi")
             }
@@ -195,11 +220,17 @@ class TCPActivity : ComponentActivity() {
                 }
                 else
                     typeBufferResponse = selectedType2
-                envoi = true
+
                 Toast.makeText(context, "Type ajouté", Toast.LENGTH_SHORT).show()
             }) {
                 Text("Ajouter au buffer de réponse")
             }
+            Spacer(modifier = Modifier.height(20.dp))
+            OutlinedTextField(
+                value = waitedResponse,
+                onValueChange = { waitedResponse = it  },
+                label = { Text("Réponse attendu") }
+            )
             Spacer(modifier = Modifier.height(20.dp))
             Text(text = "Réponse :", modifier = Modifier
                 .align(Alignment.Start)
@@ -214,8 +245,8 @@ class TCPActivity : ComponentActivity() {
             ){
                 Text(text = response)
             }
-
-
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(text = result.toString())
             Spacer(modifier = Modifier.height(20.dp))
             OutlinedTextField(
                 value = serverAddress,
@@ -226,7 +257,9 @@ class TCPActivity : ComponentActivity() {
             Spacer(modifier = Modifier.height(4.dp))
             OutlinedTextField(
                 value = serverPort
-                , onValueChange = { serverPort = it },
+                , onValueChange = {
+                    serverPort = it
+                    envoi = true },
                 label = { Text("Server Port") })
             Spacer(modifier = Modifier.height(16.dp))
             Button(
@@ -238,39 +271,82 @@ class TCPActivity : ComponentActivity() {
                     /*coroutineScope.launch(IO) {
                         TCPServer(7777).launch()
                     }*/
+                    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        val network = connectivityManager.activeNetwork
+                        val capabilities = connectivityManager.getNetworkCapabilities(network)
+                        val transport = capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                        val transport2 = capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                        connectedToNetwork = if (network!=null && capabilities!=null && (transport == true || transport2 == true)){
+                            true
+                        } else
+                            false
+                    } else {
+                        val networkInfo = connectivityManager.activeNetworkInfo
+                        connectedToNetwork = if (networkInfo!=null && (networkInfo.type == ConnectivityManager.TYPE_WIFI || networkInfo.type == ConnectivityManager.TYPE_MOBILE))
+                            true
+                        else
+                            false
+                    }
 
-                    coroutineScope.launch(IO) {
-                        var server = InetSocketAddress(serverAddress, serverPort.toInt())
-                        //"www.google.fr", 80
-                        /*var server = InetSocketAddress("www.google.fr", 80)
-                        Log.i("closeIput", closeInput.toString())*/
+                    if (connectedToNetwork){
+                        coroutineScope.launch(IO) {
+                            var server = InetSocketAddress(serverAddress, serverPort.toInt())
+                            var exceptionCaught = false
+                            //"www.google.fr", 80
+                            /*var server = InetSocketAddress("www.google.fr", 80)
+                            Log.i("closeIput", closeInput.toString())*/
 
-                        try {
-                            response=TCPClient.getResponse(byteBuffer, server, closeInput, typeBufferResponse, sizeBufferResponse)
-                        } catch (e : IOException){
-                            response = "Echec de test"
-                        } catch (e : UnresolvedAddressException){
-                            withContext(Dispatchers.Main){
-                                Toast.makeText(context, "Adresse non connu!", Toast.LENGTH_SHORT).show()
+                            try {
+                                response=TCPClient.getResponse(byteBuffer, server, closeInput, typeBufferResponse, sizeBufferResponse)
+                            } catch (e : IOException){
+                                result = false
+                                resultText = "Echec de test"
+                            } catch (e : UnresolvedAddressException){
+                                exceptionCaught = true
+                                withContext(Dispatchers.Main){
+                                    Toast.makeText(context, "Adresse non connu!", Toast.LENGTH_SHORT).show()
+                                }
                             }
+                            if (!exceptionCaught){
+                                if (Regex(pattern = waitedResponse).containsMatchIn(response)){
+                                    result = true
+                                    resultText = "Succès du test"
+                                }
+                                else{
+                                    result = false
+                                    resultText = "Échec du test"
+                                }
+
+                                var test = com.example.watchoid.entity.TCPTest(request = request, typeRequest = selectedType, dstIp = serverAddress, resultExpected = waitedResponse ,
+                                    sizeBeforeString = addSize, closeInput = closeInput, inEncoding = selectedEncoding, typeResponse = selectedType2, outEncoding = selectedEncoding2,
+                                    sizeResponse = sizeBufferResponse, dstPort = serverPort.toInt())
+                                MainActivity.database.tcpTest().insert(test)
+                                val query = selectAllFrom("tcp_tests")
+                                var id = MainActivity.database.tcpTest()
+
+                                var list = id.getAllTests(query)
+                                //var alert = Alerts(idTest = list.size, testType = "TCP", nbError = 0)
+                                //MainActivity.database.alerts().insert(alert)
+                                withContext(Dispatchers.Main){
+                                    Toast.makeText(context, "Test enregistré", Toast.LENGTH_SHORT).show()
+                                }
+
+                            }
+
+
+                            //response=TCPClientWeb.getResponse("GET / HTTP/1.1\\r\\nHost: www.google.fr\\r\\n\\r\\n", server)
+                            //Log.i("response", response)
+                            //var server = InetSocketAddress("www.google.fr", 80)
+                            //Log.i("request", request)
+                            //response=TCPClientWeb.getResponse(request, server)
+                            //Log.i("text", text)
                         }
 
-                        var test = com.example.watchoid.entity.TCPTest(date = "100", dstIp = serverAddress, nbPerio = 10L, periodicity = "Minutes", testAttendu = "true", testResult = response)
-                        MainActivity.database.tcpTest().insert(test)
-                        val query = selectAllFrom("tcp_tests")
-                        var id = MainActivity.database.tcpTest()
-
-                        var list = id.getAllTests(query)
-                        var alert = Alerts(idTest = list.size, testType = "TCP", nbError = 0)
-                        MainActivity.database.alerts().insert(alert)
-
-                        //response=TCPClientWeb.getResponse("GET / HTTP/1.1\\r\\nHost: www.google.fr\\r\\n\\r\\n", server)
-                        //Log.i("response", response)
-                        //var server = InetSocketAddress("www.google.fr", 80)
-                        //Log.i("request", request)
-                        //response=TCPClientWeb.getResponse(request, server)
-                        //Log.i("text", text)
                     }
+
+                    else
+                        Toast.makeText(context, "Aucune connexion réseau!!", Toast.LENGTH_SHORT).show()
 
                     /*Thread {
                         val timeout = 5000 // 5 seconds
@@ -314,6 +390,130 @@ class TCPActivity : ComponentActivity() {
         }
     }
 
+    companion object {
+        suspend fun automaticTCPTest(ctx : Context) {
+
+            var isStopped : Boolean
+            var result : Boolean
+            var resultText : String
+            var connectedToNetwork : Boolean
+            var context = ctx//LocalContext.current
+            var response : String = ""
+            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val network = connectivityManager.activeNetwork
+                val capabilities = connectivityManager.getNetworkCapabilities(network)
+                val transport = capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                val transport2 = capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                connectedToNetwork = network!=null && capabilities!=null && (transport == true || transport2 == true)
+            } else {
+                val networkInfo = connectivityManager.activeNetworkInfo
+                connectedToNetwork = networkInfo!=null && (networkInfo.type == ConnectivityManager.TYPE_WIFI || networkInfo.type == ConnectivityManager.TYPE_MOBILE)
+            }
+            val query = selectAllFrom("tcp_tests")
+            var tests = MainActivity.database.tcpTest().getAllTests(query)
+            var period : Long = MainActivity.database.settingsTable().getSettingByProtocol("TCP")?.periodicity?.toLong()
+                ?: 0
+            while (true){
+                for (test in tests){
+                    if (connectedToNetwork){
+                        var byteBuffer = ByteBuffer.allocate(1024)
+                        var server = InetSocketAddress(test.dstIp, test.dstPort)
+                        var exceptionCaught = false
+
+                        if (byteBuffer.remaining() <Double.SIZE_BYTES) {
+                            byteBuffer.flip()
+                            var buffer = ByteBuffer.allocate(byteBuffer.capacity()*2).put(byteBuffer)
+                            byteBuffer = buffer
+                            byteBuffer.compact()
+                        }
+                        when(test.typeRequest){
+                            "Double" -> {
+                                byteBuffer.putDouble(test.request.toDouble())
+                            }
+                            "Long" -> {
+                                byteBuffer.putLong(test.request.toLong())
+                            }
+                            "Int" -> {
+                                byteBuffer.putInt(test.request.toInt())
+                            }
+                            "String" -> {
+                                var stringBuffer = Charset.forName(test.inEncoding).encode(test.request)
+                                if (test.sizeBeforeString){
+                                    byteBuffer.putInt(stringBuffer.remaining())
+                                }
+                                while (byteBuffer.remaining() <stringBuffer.remaining()) {
+                                    byteBuffer.flip()
+                                    var buffer = ByteBuffer.allocate(byteBuffer.capacity()*2).put(byteBuffer)
+                                    byteBuffer = buffer
+
+                                }
+                                byteBuffer.put(stringBuffer)
+                            }
+                        }
+
+
+                        try {
+                            response=TCPClient.getResponse(byteBuffer, server, test.closeInput, test.outEncoding, test.sizeResponse)
+                            result = Regex(pattern = test.resultExpected).containsMatchIn(response)
+                        } catch (e : IOException){
+                            result = false
+                        } /*catch (e : UnresolvedAddressException){
+                        exceptionCaught = true
+                    }*/
+
+
+                        var log = com.example.watchoid.entity.Log(idTest = test.idTest, date = LocalDateTime.now().toString(), testType = "TCP", result = result)
+                        MainActivity.database.log().insert(log)
+                        var firstAlert = MainActivity.database.alerts().getAlertByTestId(test.idTest)
+                        var alert : Alerts
+                        if (!result) {
+                            alert = Alerts(idTest = test.idTest, testType = "TCP", nbError = (firstAlert?.nbError
+                                ?: 0) +1)
+                            if (alert.nbError==MainActivity.database.settingsTable().getNbAlertByProtocol("TCP"))
+                                showNotification(context, "New Alert", "TCP Test Failed"+ alert.nbError+ " times")
+                        }
+
+                        //MainActivity.database.alerts().insert(alert)
+                        //Toast.makeText(context, "Test enregistré", Toast.LENGTH_SHORT).show()
+
+
+
+                        //response=TCPClientWeb.getResponse("GET / HTTP/1.1\\r\\nHost: www.google.fr\\r\\n\\r\\n", server)
+                        //Log.i("response", response)
+                        //var server = InetSocketAddress("www.google.fr", 80)
+                        //Log.i("request", request)
+                        //response=TCPClientWeb.getResponse(request, server)
+                        //Log.i("text", text)
+
+
+                    }
+
+                    else
+                        showNotification(context, "New Alert", "No internet connection!")
+                }
+
+                delay(period*1000)
+            }
+
+
+
+        }
+
+        private fun selectAllFrom(tableName: String) = SimpleSQLiteQuery("SELECT * FROM $tableName")
+
+        @Throws(IOException::class)
+        private fun readFully(socketChannel : SocketChannel, buffer : ByteBuffer) : Boolean{
+            while (socketChannel.read(buffer)!=-1){
+                if (!buffer.hasRemaining()){
+                    return true
+                }
+            }
+            return  false
+        }
+        }
+    }
+
 
     @Composable
     fun MyCheckBox(text : String, onValueChange : (Boolean) -> Unit){
@@ -333,6 +533,47 @@ class TCPActivity : ComponentActivity() {
             )
         }
     }
+
+
+
+fun createNotificationChannel(context: Context) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val name = "TCP Test Notifications"
+        val descriptionText = "Notifications for TCP test results"
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel("tcp_test_channel", name, importance).apply {
+            description = descriptionText
+        }
+        val notificationManager: NotificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+    }
+}
+
+fun showNotification(context: Context, title: String, message: String) {
+    val intent = Intent(context, MainActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    }
+    val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+    val builder = NotificationCompat.Builder(context, "tcp_test_channel")
+        .setContentTitle(title)
+        .setContentText(message)
+        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        .setContentIntent(pendingIntent)
+        .setAutoCancel(true)
+
+    with(NotificationManagerCompat.from(context)) {
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return@with
+        }
+        notify(2, builder.build())
+    }
+}
 
     @Composable
     fun MyDropDownMenu(label : String, list : List<String>, onValueChange: (String) -> Unit){
@@ -397,4 +638,4 @@ class TCPActivity : ComponentActivity() {
             }
         }
     }
-}
+

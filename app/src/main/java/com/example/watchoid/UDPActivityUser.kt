@@ -37,7 +37,6 @@ import com.example.watchoid.composant.CheckBox
 import com.example.watchoid.composant.DropDownMenu
 import com.example.watchoid.composant.InputTextField
 import com.example.watchoid.composant.InputTextFieldNumber
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
@@ -53,7 +52,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.example.watchoid.entity.Alerts
-import com.example.watchoid.entity.UDPTest
 import kotlinx.coroutines.Dispatchers.IO
 
 
@@ -143,7 +141,8 @@ class UDPActivityUser : ComponentActivity() {
                     .weight(1f)
                     .padding(bottom = 8.dp, end = 8.dp))
                 if (valueType.value == "String"){
-                    InputTextField(text = value, modifier = Modifier
+                    InputTextField(
+                        text = value, modifier = Modifier
                         .weight(1f)
                         .padding(bottom = 8.dp, end = 8.dp), label = "Value")
                     DropDownMenu(charsetList, charset, modifier = Modifier
@@ -169,7 +168,8 @@ class UDPActivityUser : ComponentActivity() {
                         .weight(1f)
                         .padding(bottom = 8.dp, end = 8.dp))
                     if (row.valueType.value == "String"){
-                        InputTextField(text = row.period, modifier = Modifier
+                        InputTextField(
+                            text = row.period, modifier = Modifier
                             .weight(1f)
                             .padding(bottom = 8.dp, end = 8.dp), label = "Value")
                         DropDownMenu(charsetList, row.charset, modifier = Modifier
@@ -208,7 +208,8 @@ class UDPActivityUser : ComponentActivity() {
                         .weight(1f)
                         .padding(bottom = 8.dp, end = 8.dp))
                     if (response.valueType.value == "String"){
-                        InputTextField(text = response.value, modifier = Modifier
+                        InputTextField(
+                            text = response.value, modifier = Modifier
                             .weight(1f)
                             .padding(bottom = 8.dp, end = 8.dp), label = "Value")
                         DropDownMenu(charsetList, response.charset, modifier = Modifier

@@ -26,6 +26,7 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import com.example.watchoid.composant.Background
 import com.example.watchoid.entity.HTTPTest
 import com.example.watchoid.entity.ICMPTest
+import com.example.watchoid.entity.Log
 import com.example.watchoid.entity.TCPTest
 import com.example.watchoid.entity.UDPTest
 import kotlinx.coroutines.CoroutineScope
@@ -68,11 +69,11 @@ class Log : ComponentActivity() {
             }
             Button(onClick = {
                 CoroutineScope(IO).launch {
-                    var udp = MainActivity.database.tcpTest()
+                    var tcp = MainActivity.database.tcpTest()
                     selectedOption.value = "TCP"
-                    val tableName = "tcp_tests"
+                    val tableName = "log"
                     val query = selectAllFrom(tableName)
-                    anyList.value = udp.getAllTests(query)
+                    anyList.value = tcp.getAllTests(query)
                 }
             }, shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
@@ -120,10 +121,10 @@ class Log : ComponentActivity() {
                     }
                 }
                 "TCP" ->{
-                    val testList: List<TCPTest> = anyList.value.mapNotNull { it as? TCPTest }
+                    val testList: List<Log> = anyList.value.mapNotNull { it as? Log }
                     testList.forEach {
                         Row {
-                            Text(text = "Test ID : ${it.id_test} "+"IP Destination ${it.dstIp} "+"Test Result ${it.testResult} "+"Test Expected Result :  ${it.testAttendu} "+"Date : ${it.date}")
+                            Text(text = "Test ID : ${it.idTest} "+"Date ${it.date} "+"Test Type ${it.testType} "+"Test Result :  ${it.result} ")
                         }
                     }
                 }

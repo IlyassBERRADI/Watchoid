@@ -2,15 +2,25 @@ package com.example.watchoid
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import android.util.Log
 import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -19,6 +29,7 @@ import com.example.watchoid.composant.NavigationButton
 import com.example.watchoid.entity.Settings
 import com.example.watchoid.entity.TCPTest
 import com.example.watchoid.entity.User
+import com.example.watchoid.service.TestService
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -30,7 +41,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-
+        database = AppDatabase.getDatabase(this)
         setContent {
             Background(text = "Watchoid", true)
             Column(modifier = Modifier.fillMaxSize(),
@@ -39,25 +50,33 @@ class MainActivity : ComponentActivity() {
             ) {
                 NavigationButton("New Tests", Protocol_chooser::class)
                 NavigationButton("See Logs", Log::class)
-            }
-            applicationContext.deleteDatabase("my_database");
-            var coroutine = rememberCoroutineScope();
-            database = Room.databaseBuilder(
-                applicationContext,
-                AppDatabase::class.java,
-                "my_database"
-            ).build()
-            coroutine.launch {
-                var list = listOf(
-                    Settings(testType = "ICMP", nbError = 10),
-                    Settings(testType = "TCP", nbError = 10),
-                    Settings(testType = "UDP", nbError = 10),
-                    Settings(testType = "HTTP", nbError = 10))
-                list.forEach {
-                    database.settingsTable().insert(it)
+                val context = LocalContext.current
+                Button(onClick = {
+                    context.startService(Intent(context, TestService::class.java))
+                }, shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
+                    Text(text = "Start tests", fontSize = 20.sp)
                 }
-                val newUser = User(username = "JohnDoe", email = "john@example.com")
-                database.userDao().insertUser(newUser)
+            }
+            //applicationContext.deleteDatabase("my_database");
+            var coroutine = rememberCoroutineScope();
+
+            coroutine.launch {
+                if (database.settingsTable().getAllSettings().isEmpty()){
+                    var list = listOf(
+                        Settings(protocol = "HTTP", periodicity = 10, timeUnitPeriodicity = "Min", timeBeforeDeletion = 2000, timeUnitDeletion = "Min", nbError = 10),
+                        Settings(protocol = "UDP", periodicity = 10, timeUnitPeriodicity = "Min", timeBeforeDeletion = 2000, timeUnitDeletion = "Min", nbError = 10),
+                        Settings(protocol = "TCP", periodicity = 10, timeUnitPeriodicity = "Min", timeBeforeDeletion = 2000, timeUnitDeletion = "Min", nbError = 10),
+                        Settings(protocol = "ICMP", periodicity = 10, timeUnitPeriodicity = "Min", timeBeforeDeletion = 2000, timeUnitDeletion = "Min", nbError = 10))
+                    list.forEach {
+                        database.settingsTable().insert(it)
+                    }
+                }
+                if (database.userDao().getAllUsers().isEmpty()){
+                    val newUser = User(username = "JohnDoe", email = "john@example.com")
+                    database.userDao().insertUser(newUser)
+                }
+
             }
 
         }
