@@ -26,6 +26,9 @@ interface LogDAO {
     @RawQuery
     suspend fun getAllLogs(query: SupportSQLiteQuery): List<Log>
 
+    @Query("SELECT * FROM log WHERE test_type = :protocol")
+    suspend fun getLogsByProtocol(protocol: String): List<Log>
+
     @Query("SELECT * FROM log WHERE id_test = :id LIMIT 1")
     suspend fun getLogById(id: Int): Log?
 }

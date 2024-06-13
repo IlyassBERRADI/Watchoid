@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -27,13 +29,12 @@ import com.example.watchoid.composant.Background
 import com.example.watchoid.entity.HTTPTest
 import com.example.watchoid.entity.ICMPTest
 import com.example.watchoid.entity.Log
-import com.example.watchoid.entity.TCPTest
 import com.example.watchoid.entity.UDPTest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 
-class Log : ComponentActivity() {
+class LogActivity : ComponentActivity() {
     fun selectAllFrom(tableName: String) = SimpleSQLiteQuery("SELECT * FROM $tableName")
     @SuppressLint("CoroutineCreationDuringComposition")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,11 +70,9 @@ class Log : ComponentActivity() {
             }
             Button(onClick = {
                 CoroutineScope(IO).launch {
-                    var tcp = MainActivity.database.tcpTest()
+                    var log = MainActivity.database.log()
                     selectedOption.value = "TCP"
-                    val tableName = "log"
-                    val query = selectAllFrom(tableName)
-                    anyList.value = tcp.getAllTests(query)
+                    anyList.value = log.getLogsByProtocol("TCP")
                 }
             }, shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
@@ -122,11 +121,14 @@ class Log : ComponentActivity() {
                 }
                 "TCP" ->{
                     val testList: List<Log> = anyList.value.mapNotNull { it as? Log }
-                    testList.forEach {
-                        Row {
-                            Text(text = "Test ID : ${it.idTest} "+"Date ${it.date} "+"Test Type ${it.testType} "+"Test Result :  ${it.result} ")
+                    val state = rememberScrollState()
+                    Column(Modifier.verticalScroll(state)) {
+                        testList.forEach {
+                            Text(text = "Test ID : ${it.idTest} " + "Date : ${it.date} " + "Test Type : ${it.testType} " + "Test Result :  ${it.result} ")
+
                         }
                     }
+
                 }
                 "HTTP" ->{
                     val testList: List<HTTPTest> = anyList.value.mapNotNull { it as? HTTPTest }

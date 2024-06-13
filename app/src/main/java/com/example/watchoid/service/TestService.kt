@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import androidx.annotation.RequiresApi
 import androidx.compose.ui.platform.LocalContext
 import com.example.watchoid.R
 import com.example.watchoid.TCPActivity
@@ -18,12 +19,12 @@ import kotlinx.coroutines.launch
 class TestService : Service() {
     companion object {
         private const val testChannelId = "testChannelId"
-        private const val channelName = "testName"
+        private const val channelName = "Network tests notifications"
         private const val minTimeLocationUpdateInMillisecond = 10000L
         private const val minDistanceLocationUpdateInMeter = 1000F
     }
 
-    override fun onCreate() {
+    /*override fun onCreate() {
         notificationService()
         super.onCreate()
     }
@@ -57,7 +58,7 @@ class TestService : Service() {
             // Set the content text of the notification
             setContentText("Running service to execute automatic tests")
             // Set the small icon for the notification
-            //setSmallIcon(R.drawable.ic_notifcation_icon)
+            setSmallIcon(R.drawable.ic_launcher_foreground)
         }
 
         // Start the service in the foreground
@@ -68,19 +69,38 @@ class TestService : Service() {
             // For API levels below 26, use startForeground without notification channel
             startForeground(1, notificationBuilder.build())
         }
+    }*/
+
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        when(intent?.action){
+            Actions.START.toString() -> start()
+            Actions.STOP.toString() -> stopSelf()
+        }
+
+        return super.onStartCommand(intent, flags, startId)
     }
 
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun start(){
+        val notification = Notification.Builder(this, testChannelId)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle("Test service")
+            .setContentText("Running service to execute automatic tests")
+            .build()
+        startForeground(1, notification)
         CoroutineScope(IO).launch {
             TCPActivity.automaticTCPTest(this@TestService)
         }
-        //notificationService()
-        return START_STICKY
     }
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
+    }
+
+    enum class Actions {
+        START, STOP
     }
 
 }

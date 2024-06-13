@@ -1,8 +1,10 @@
 package com.example.watchoid
 
 import android.annotation.SuppressLint
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -41,6 +44,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                0
+            )
+        }
+
         database = AppDatabase.getDatabase(this)
         setContent {
             Background(text = "Watchoid", true)
@@ -49,13 +60,23 @@ class MainActivity : ComponentActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 NavigationButton("New Tests", Protocol_chooser::class)
-                NavigationButton("See Logs", Log::class)
+                NavigationButton("See Logs", LogActivity::class)
                 val context = LocalContext.current
                 Button(onClick = {
-                    context.startService(Intent(context, TestService::class.java))
+                    val intent : Intent = Intent(context, TestService::class.java)
+                    intent.action = TestService.Actions.START.toString()
+                    context.startService(intent)
                 }, shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
                     Text(text = "Start tests", fontSize = 20.sp)
+                }
+                Button(onClick = {
+                    val intent : Intent = Intent(context, TestService::class.java)
+                    intent.action = TestService.Actions.STOP.toString()
+                    context.startService(intent)
+                }, shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
+                    Text(text = "Stop tests", fontSize = 20.sp)
                 }
             }
             //applicationContext.deleteDatabase("my_database");
