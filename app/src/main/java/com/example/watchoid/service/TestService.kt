@@ -9,20 +9,24 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import com.example.watchoid.R
 import com.example.watchoid.TCPActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 class TestService : Service() {
-    companion object {
+    private lateinit var coroutineScope: CoroutineScope
+
+    /*companion object {
         private const val testChannelId = "testChannelId"
         private const val channelName = "Network tests notifications"
         private const val minTimeLocationUpdateInMillisecond = 10000L
         private const val minDistanceLocationUpdateInMeter = 1000F
-    }
+    }*/
 
     /*override fun onCreate() {
         notificationService()
@@ -76,7 +80,7 @@ class TestService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when(intent?.action){
             Actions.START.toString() -> start()
-            Actions.STOP.toString() -> stopSelf()
+            Actions.STOP.toString() -> stop()
         }
 
         return super.onStartCommand(intent, flags, startId)
@@ -84,15 +88,21 @@ class TestService : Service() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun start(){
-        val notification = Notification.Builder(this, testChannelId)
+        coroutineScope = CoroutineScope(IO)
+        val notification = Notification.Builder(this, "testChannelId")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle("Test service")
             .setContentText("Running service to execute automatic tests")
             .build()
         startForeground(1, notification)
-        CoroutineScope(IO).launch {
+        coroutineScope.launch {
             TCPActivity.automaticTCPTest(this@TestService)
         }
+    }
+
+    private fun stop() {
+        coroutineScope.cancel()  // Cancel the scope to stop the coroutine
+        stopSelf()  // Stop the service
     }
 
     override fun onBind(p0: Intent?): IBinder? {
