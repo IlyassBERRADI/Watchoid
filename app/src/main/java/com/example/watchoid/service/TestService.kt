@@ -11,8 +11,10 @@ import android.os.IBinder
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
+import com.example.watchoid.ICMPActivityUser
 import com.example.watchoid.R
 import com.example.watchoid.TCPActivity
+import com.example.watchoid.UDPActivityUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.cancel
@@ -20,6 +22,8 @@ import kotlinx.coroutines.launch
 
 class TestService : Service() {
     private lateinit var coroutineScope: CoroutineScope
+    private lateinit var coroutineScopeIcmp: CoroutineScope
+    private lateinit var coroutineScopeUDP: CoroutineScope
 
     /*companion object {
         private const val testChannelId = "testChannelId"
@@ -87,8 +91,11 @@ class TestService : Service() {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
+
     private fun start(){
         coroutineScope = CoroutineScope(IO)
+        coroutineScopeIcmp = CoroutineScope(IO)
+        coroutineScopeUDP = CoroutineScope(IO)
         val notification = Notification.Builder(this, "testChannelId")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle("Test service")
@@ -98,9 +105,17 @@ class TestService : Service() {
         coroutineScope.launch {
             TCPActivity.automaticTCPTest(this@TestService)
         }
+        coroutineScopeIcmp.launch {
+            ICMPActivityUser.automaticICMPTest(this@TestService)
+        }
+        coroutineScopeUDP.launch {
+            UDPActivityUser.automaticUDPTest(this@TestService)
+        }
     }
 
     private fun stop() {
+        coroutineScopeIcmp.cancel()
+        coroutineScopeUDP.cancel()
         coroutineScope.cancel()  // Cancel the scope to stop the coroutine
         stopSelf()  // Stop the service
     }

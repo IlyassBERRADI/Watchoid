@@ -1,6 +1,10 @@
 package com.example.watchoid
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -40,9 +44,11 @@ import com.example.watchoid.composant.InputTextFieldNumber
 import com.example.watchoid.entity.Alerts
 import com.example.watchoid.entity.ICMPTest
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.time.LocalDateTime
 
 
 class ICMPActivityUser : ComponentActivity() {
@@ -53,7 +59,7 @@ class ICMPActivityUser : ComponentActivity() {
             ICMPDemo()
         }
     }
-
+    fun selectAllFrom(tableName: String) = SimpleSQLiteQuery("SELECT * FROM $tableName")
     fun extractPingStats(pingOutput: String): Map<String, String> {
         val regexPacket = """(\d+)% packet loss""".toRegex()
         val packetLoss = regexPacket.find(pingOutput)
@@ -165,7 +171,6 @@ class ICMPActivityUser : ComponentActivity() {
             }
         }
     }
-    fun selectAllFrom(tableName: String) = SimpleSQLiteQuery("SELECT * FROM $tableName")
 
     @SuppressLint("CoroutineCreationDuringComposition")
     @Composable
@@ -275,7 +280,7 @@ class ICMPActivityUser : ComponentActivity() {
                         }
 
                         if(testChoosen.value == "Server availability"){
-                            var test = ICMPTest(date = "10/10/2020", dstIp = serverAddress.value, nbPerio = period.value.toLong(), periodicity =  unitTime.value, testAttendu = expectedResult.value, testResult = ping, testType =  testChoosen.value, tpsAvg = avgTime.value, tpsMax = maxTime.value, tpsMin = minTime.value)
+                            var test = ICMPTest(nbPacket = nbPacket.value,date = "10/10/2020", dstIp = serverAddress.value, nbPerio = period.value.toLong(), periodicity =  unitTime.value, testAttendu = expectedResult.value, testResult = ping, testType =  testChoosen.value, tpsAvg = avgTime.value, tpsMax = maxTime.value, tpsMin = minTime.value)
                             MainActivity.database.icmpTest().insert(test)
                             val query = selectAllFrom("icmp_tests")
                             var id = MainActivity.database.icmpTest()
@@ -285,7 +290,7 @@ class ICMPActivityUser : ComponentActivity() {
                             MainActivity.database.alerts().insert(alert)
 
                         } else if(testChoosen.value == "Response time"){
-                            var test = ICMPTest(date = "10/10/2020", dstIp = serverAddress.value, nbPerio = period.value.toLong(), periodicity =  unitTime.value, testAttendu = packetTime.value, testResult =  maxTime.value.toString(), testType = testChoosen.value, tpsAvg = avgTime.value, tpsMax = maxTime.value, tpsMin = minTime.value)
+                            var test = ICMPTest(nbPacket = nbPacket.value,date = "10/10/2020", dstIp = serverAddress.value, nbPerio = period.value.toLong(), periodicity =  unitTime.value, testAttendu = packetTime.value, testResult =  maxTime.value.toString(), testType = testChoosen.value, tpsAvg = avgTime.value, tpsMax = maxTime.value, tpsMin = minTime.value)
                             MainActivity.database.icmpTest().insert(test)
                             val query = selectAllFrom("icmp_tests")
                             var id = MainActivity.database.icmpTest()
@@ -311,4 +316,169 @@ class ICMPActivityUser : ComponentActivity() {
         }
 
     }
+
+    companion object{
+
+        fun extractPingStats(pingOutput: String): Map<String, String> {
+            val regexPacket = """(\d+)% packet loss""".toRegex()
+            val packetLoss = regexPacket.find(pingOutput)
+            val regex = """rtt min/avg/max/mdev = ([\d.]+)/([\d.]+)/([\d.]+)/([\d.]+) ms""".toRegex()
+            val matchResult = regex.find(pingOutput)
+
+            return if (matchResult != null && packetLoss != null) {
+                mapOf(
+                    "min" to matchResult.groupValues[1],
+                    "avg" to matchResult.groupValues[2],
+                    "max" to matchResult.groupValues[3],
+                    "mdev" to matchResult.groupValues[4],
+                    "packetLoss" to packetLoss.groupValues[1]
+                )
+            } else {
+                emptyMap()
+            }
+        }
+
+        fun pingMaxTime(nbPacket: String, serverAddress: String): Map<String, String> {
+            val command = "ping -c ${nbPacket} ${serverAddress}"
+            val process = Runtime.getRuntime().exec(command)
+            val reader = BufferedReader(InputStreamReader(process.inputStream))
+            val result = StringBuilder()
+            var line: String?
+
+            while (reader.readLine().also { line = it } != null){
+                result.append(line).append("\n")
+            }
+
+            process.waitFor()
+            println(result.toString())
+            val pingStats = extractPingStats(result.toString())
+            if (pingStats.isNotEmpty()) {
+                println("Min: ${pingStats["min"]} ms")
+                println("Avg: ${pingStats["avg"]} ms")
+                println("Max: ${pingStats["max"]} ms")
+                println("Mdev: ${pingStats["mdev"]} ms")
+                return pingStats
+            } else {
+                println("Impossible de trouver les statistiques de ping dans la sortie.")
+                return emptyMap()
+            }
+        }
+
+        fun ping(nbPacket: String, serverAddress: String):Map<String, String> {
+            val command = "ping -c ${nbPacket} ${serverAddress}"
+            val process = Runtime.getRuntime().exec(command)
+            val reader = BufferedReader(InputStreamReader(process.inputStream))
+            val result = StringBuilder()
+            var line: String?
+
+            while (reader.readLine().also { line = it } != null){
+                result.append(line).append("\n")
+            }
+
+            process.waitFor()
+            println(result.toString())
+            val pingStats = extractPingStats(result.toString())
+            if (pingStats.isNotEmpty()) {
+                println("Min: ${pingStats["min"]} ms")
+                println("Avg: ${pingStats["avg"]} ms")
+                println("Max: ${pingStats["max"]} ms")
+                println("Mdev: ${pingStats["mdev"]} ms")
+                println("Packet Loss: ${pingStats["packetLoss"]}%")
+                return pingStats
+            } else {
+                println("Impossible de trouver les statistiques de ping dans la sortie.")
+                return emptyMap()
+            }
+        }
+        fun selectAllFrom(tableName: String) = SimpleSQLiteQuery("SELECT * FROM $tableName")
+        suspend fun automaticICMPTest(ctx : Context){
+            println("Je suis là bg")
+            var isStopped : Boolean
+            var result : Boolean
+            var resultText : String
+            var connectedToNetwork : Boolean
+            var context = ctx//LocalContext.current
+            var maxTime = mutableStateOf<Double?>(0.0)
+            var avgTime = mutableStateOf<Double?>(0.0)
+            var minTime = mutableStateOf<Double?>(0.0)
+            var response : String = ""
+            var ping = mutableStateOf("zoumiz")
+            var abovePacketTime = mutableStateOf("zoumiz")
+            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val network = connectivityManager.activeNetwork
+                val capabilities = connectivityManager.getNetworkCapabilities(network)
+                val transport = capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                val transport2 = capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                connectedToNetwork = network!=null && capabilities!=null && (transport == true || transport2 == true)
+            } else {
+                val networkInfo = connectivityManager.activeNetworkInfo
+                connectedToNetwork = networkInfo!=null && (networkInfo.type == ConnectivityManager.TYPE_WIFI || networkInfo.type == ConnectivityManager.TYPE_MOBILE)
+            }
+            val query = selectAllFrom("icmp_tests")
+            var tests = MainActivity.database.icmpTest().getAllTests(query)
+            var period : Long = MainActivity.database.settingsTable().getSettingByProtocol("ICMP")?.periodicity?.toLong()?:0
+            while(true){
+                for(test in tests){
+                    println("connectedToNetwork"+connectedToNetwork)
+                    if(connectedToNetwork){
+                        if(test.testType == "Server availability"){
+                            println("availability")
+                            var allTimeArray = ping(test.nbPacket, test.dstIp)
+                            var packetloss = allTimeArray["packetLoss"]?.toIntOrNull()
+                            maxTime.value = allTimeArray["max"]?.toDoubleOrNull()
+                            avgTime.value = allTimeArray["avg"]?.toDoubleOrNull()
+                            minTime.value = allTimeArray["min"]?.toDoubleOrNull()
+                            if (packetloss != null) {
+                                if (packetloss < 0 || packetloss > 0){
+                                    ping.value = "false"
+                                } else {
+                                    ping.value = "true"
+                                }
+                            }
+                        }
+                    } else if(test.testType == "Response time"){
+                        println("Response time")
+                        var timeTab = pingMaxTime(test.nbPacket, test.dstIp)
+                        maxTime.value = timeTab["max"]?.toDoubleOrNull()
+                        avgTime.value = timeTab["avg"]?.toDoubleOrNull()
+                        minTime.value = timeTab["min"]?.toDoubleOrNull()
+                        if (maxTime != null) {
+                            if(maxTime.value!! > test.testAttendu.toIntOrNull()!!){
+                                println("No work")
+                                abovePacketTime.value = "true"
+                            } else {
+                                println("work")
+                                abovePacketTime.value = "false"
+                            }
+                        }
+                    }
+                    if(test.testType == "Server availability"){
+                        var testInDB= ICMPTest(nbPacket = test.nbPacket,date = "10/10/2020", dstIp = test.dstIp, nbPerio = test.nbPerio, periodicity =  test.periodicity, testAttendu = test.testAttendu, testResult = ping.value, testType =  test.testType, tpsAvg = avgTime.value, tpsMax = maxTime.value, tpsMin = minTime.value)
+                        MainActivity.database.icmpTest().insert(testInDB)
+                        var id = MainActivity.database.icmpTest()
+
+                        var list = id.getAllTests(query)
+                        var alert = Alerts(idTest = list.size, testType = "ICMP", nbError = 0)
+                        MainActivity.database.alerts().insert(alert)
+                        var log = com.example.watchoid.entity.Log(idTest = test.id_test, date = LocalDateTime.now().toString(), testType = "ICMP", result = ping.value.toBoolean())
+                        MainActivity.database.log().insert(log)
+
+                    } else if(test.testType == "Response time"){
+                        var testInDB = ICMPTest(nbPacket = test.nbPacket,date = "10/10/2020", dstIp = test.dstIp, nbPerio = test.nbPerio, periodicity =  test.periodicity, testAttendu = test.testAttendu, testResult =  maxTime.value.toString(), testType = test.testType, tpsAvg = avgTime.value, tpsMax = maxTime.value, tpsMin = minTime.value)
+                        MainActivity.database.icmpTest().insert(testInDB)
+                        var id = MainActivity.database.icmpTest()
+
+                        var list = id.getAllTests(query)
+                        var alert = Alerts(idTest = list.size, testType = "ICMP", nbError = 0)
+                        MainActivity.database.alerts().insert(alert)
+                        var log = com.example.watchoid.entity.Log(idTest = test.id_test, date = LocalDateTime.now().toString(), testType = "ICMP", result = abovePacketTime.value.toBoolean())
+                        MainActivity.database.log().insert(log)
+                    }
+                }
+                delay(period*1000)
+            }
+        }
+    }
+
 }

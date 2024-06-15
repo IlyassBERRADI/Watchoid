@@ -79,7 +79,7 @@ class MainActivity : ComponentActivity() {
                     Text(text = "Stop tests", fontSize = 20.sp)
                 }
             }
-            //applicationContext.deleteDatabase("my_database");
+            applicationContext.deleteDatabase("my_database");
             var coroutine = rememberCoroutineScope();
 
             coroutine.launch {
