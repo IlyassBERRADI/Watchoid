@@ -23,6 +23,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.text.font.FontWeight
 import androidx.core.app.ActivityCompat
 import androidx.room.Room
 import androidx.room.migration.Migration
@@ -40,6 +46,7 @@ class MainActivity : ComponentActivity() {
         lateinit var database: AppDatabase
     }
 
+    @OptIn(ExperimentalFoundationApi::class)
     @SuppressLint("CoroutineCreationDuringComposition")
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -70,14 +77,38 @@ class MainActivity : ComponentActivity() {
                     colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
                     Text(text = "Start tests", fontSize = 20.sp)
                 }
-                Button(onClick = {
+                Box(
+                    modifier = Modifier
+                        .background(
+                            color = Color(0xFF2E698A),
+                            shape = RoundedCornerShape(10.dp)
+                        ).padding(23.dp, 10.dp)
+                        .combinedClickable(
+                            onClick = {
+                                val intent : Intent = Intent(context, TestService::class.java)
+                                intent.action = TestService.Actions.STOP.toString()
+                                context.startService(intent)
+                            },
+                            onLongClick = {
+                                context.startActivity(Intent(context, TicTacToe::class.java))
+                            }
+                        )
+                ){
+                    Text(
+                        text = "Stop tests",
+                        fontSize = 20.sp,
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+                /*Button(onClick = {
                     val intent : Intent = Intent(context, TestService::class.java)
                     intent.action = TestService.Actions.STOP.toString()
                     context.startService(intent)
                 }, shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
                     Text(text = "Stop tests", fontSize = 20.sp)
-                }
+                }*/
             }
             //applicationContext.deleteDatabase("my_database");
             var coroutine = rememberCoroutineScope();

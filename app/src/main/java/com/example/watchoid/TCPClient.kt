@@ -9,6 +9,7 @@ import java.nio.ByteBuffer
 import java.nio.channels.SocketChannel
 import java.nio.channels.UnresolvedAddressException
 import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 
 class TCPClient() {
     companion object {
@@ -17,13 +18,14 @@ class TCPClient() {
 
 
         @Throws(IOException::class, UnresolvedAddressException::class)
-        fun getResponse(sentBuffer : ByteBuffer, server : SocketAddress, closeInput : Boolean, outEncoding : String, sizeBuffer:Int?) : String {
+        fun getResponse(sentBuffer : ByteBuffer, server : SocketAddress, closeInput : Boolean, outEncoding : String, sizeBuffer:Int?/*, sizeBeforeResponse : Boolean*/) : String {
             var socketChannel: SocketChannel? = null
             try {
                 socketChannel = SocketChannel.open()
                 var bool = socketChannel.connect(server)
                 Log.i("Server","Connected to server "+socketChannel.socket().remoteSocketAddress)
                 sentBuffer.flip()
+                //Log.i("striiing", StandardCharsets.UTF_8.decode(sentBuffer).toString())
                 var bytesWritten = socketChannel.write(sentBuffer)
                 if (closeInput){
                     socketChannel.socket().shutdownOutput()
@@ -35,13 +37,42 @@ class TCPClient() {
                     "Int" -> bufferResponse = ByteBuffer.allocate(Int.SIZE_BYTES)
                     "Long" -> bufferResponse = ByteBuffer.allocate(Long.SIZE_BYTES)
                     else -> {
-                        bufferResponse = ByteBuffer.allocate(Int.SIZE_BYTES)
+
+
+                        if (sizeBuffer==null){
+                            bufferResponse = ByteBuffer.allocate(Int.SIZE_BYTES)
+                            while (socketChannel.read(bufferResponse)!=-1){
+                                if (!bufferResponse.hasRemaining()){
+                                    break
+                                }
+                            }
+                            var size = bufferResponse.getInt()
+                            bufferResponse = ByteBuffer.allocate(size)
+                        }
+                        else {
+                            bufferResponse = ByteBuffer.allocate(sizeBuffer)
+                        }
+                        /*while (socketChannel.read(bufferResponse)!=-1){
+                            if (!bufferResponse.hasRemaining()){
+                                break
+                            }
+                        }*/
                     }
                 }
                 var result : String
-
-                while (socketChannel.read(bufferResponse)!=-1){
+                var readBytes : Int
+                /*while ((readBytes=socketChannel.read(bufferResponse))!=-1){
                     if (!bufferResponse.hasRemaining()){
+                        break
+                    }
+                }*/
+                while (true) {
+                    Log.i("starrrtt", "lesssggoooooo")
+                    Log.i("encoding", outEncoding)
+                    readBytes = socketChannel.read(bufferResponse)
+                    Log.i("bytesRead", readBytes.toString())
+
+                    if (readBytes == -1 || !bufferResponse.hasRemaining()) {
                         break
                     }
                 }
@@ -53,18 +84,8 @@ class TCPClient() {
                     "Long" -> result = bufferResponse.getLong().toString()
                     else -> {
 
-                        if (sizeBuffer==null){
-                            var size = bufferResponse.getInt()
-                            bufferResponse = ByteBuffer.allocate(size)
-                        }
-                        else
-                            bufferResponse = ByteBuffer.allocate(sizeBuffer)
-                        while (socketChannel.read(bufferResponse)!=-1){
-                            if (!bufferResponse.hasRemaining()){
-                                break
-                            }
-                        }
-                        bufferResponse.flip()
+
+                        //bufferResponse.flip()
                         result = Charset.forName(outEncoding).decode(bufferResponse).toString()
 
                     }

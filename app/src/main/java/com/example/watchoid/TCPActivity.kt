@@ -104,6 +104,7 @@ class TCPActivity : ComponentActivity() {
         val state2 = rememberScrollState()
         var empty by remember { mutableStateOf(false) }
         var addSize by remember { mutableStateOf(false) }
+        var addSize2 by remember { mutableStateOf(false) }
         var connectedToNetwork by remember { mutableStateOf(false) }
         var request by remember { mutableStateOf("") }
         var response by remember { mutableStateOf("") }
@@ -209,6 +210,7 @@ class TCPActivity : ComponentActivity() {
             )*/
             MyDropDownMenu("Type de réponse", listOf("Double", "Long", "Int", "String")) { selectedType2 = it }
             MyDropDownMenu("Encodage", listOf("UTF-8", "ASCII", "ISO-8859-1")) { selectedEncoding2 = it }
+            //MyCheckBox("Recevoir la taille avant la chaîne encodée") { addSize2 = it }
             OutlinedTextField(
                 value = if(sizeBufferResponse==null) "" else sizeBufferResponse.toString(),
                 onValueChange = { sizeBufferResponse = if(it=="") null else it.toInt()   },
@@ -298,7 +300,7 @@ class TCPActivity : ComponentActivity() {
                             Log.i("closeIput", closeInput.toString())*/
 
                             try {
-                                response=TCPClient.getResponse(byteBuffer, server, closeInput, typeBufferResponse, sizeBufferResponse)
+                                response=TCPClient.getResponse(byteBuffer, server, closeInput, typeBufferResponse, sizeBufferResponse/*, addSize2*/)
                             } catch (e : IOException){
                                 result = false
                                 resultText = "Echec de test"

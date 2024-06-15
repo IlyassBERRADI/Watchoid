@@ -21,6 +21,11 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".TicTacToe"
+            android:exported="false"
+            android:label="@string/title_activity_tic_tac_toe"
+            android:theme="@style/Theme.Watchoid" />
+        <activity
             android:name=".TapTap"
             android:exported="false"
             android:label="@string/title_activity_tap_tap"
@@ -81,6 +86,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <service
             android:name=".service.TestService"
             android:enabled="true"

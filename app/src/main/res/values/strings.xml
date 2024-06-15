@@ -9,4 +9,5 @@
     <string name="title_activity_log">Log</string>
     <string name="title_activity_alert">Alert</string>
     <string name="title_activity_tap_tap">TapTap</string>
+    <string name="title_activity_tic_tac_toe">TicTacToe</string>
 </resources>
