@@ -1,5 +1,7 @@
 package com.example.watchoid
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -45,10 +47,16 @@ import java.net.URL
 import java.util.regex.Pattern
 import java.io.IOException
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.platform.LocalContext
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.example.watchoid.entity.Alerts
+import com.example.watchoid.service.TestService
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
 
 
 class HTTPActivity : ComponentActivity() {
@@ -71,12 +79,10 @@ class HTTPActivity : ComponentActivity() {
         var url by rememberSaveable { mutableStateOf("") }
         var selectedType by remember { mutableStateOf("") }
         var pattern by remember { mutableStateOf("") }
-        var tag by remember { mutableStateOf("") }
-        var position by remember { mutableIntStateOf(-1) }
         var path by remember { mutableStateOf("") }
-        var value by remember { mutableStateOf("") }
         var selectedType2 by remember { mutableStateOf("") }
         var result: Boolean? by remember { mutableStateOf(null) }
+        val context = LocalContext.current
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -92,38 +98,7 @@ class HTTPActivity : ComponentActivity() {
                                  Log.i("selectedType", selectedType)}, // Fournir une fonction lambda vide pour onValueChanged
                 onTextChange = { url = it })
             Spacer(modifier = Modifier.height(20.dp))
-            //Log.i("selectedtype", selectedType)
-            /*if (selectedType=="Text"){
-                OutlinedTextField(
-                    value = pattern,
-                    onValueChange = { pattern = it },
-                    label = { Text("Pattern") }
-                )
-            }
-            else if (selectedType=="Html"){
-                OutlinedTextField(
-                    value = tag,
-                    onValueChange = { tag = it },
-                    label = { Text("Tag") }
-                )
-                OutlinedTextField(
-                    value = position.toString(),
-                    onValueChange = { position = it.toInt() },
-                    label = { Text("Position") }
-                )
-            }
-            else if (selectedType=="JSON"){
-                OutlinedTextField(
-                    value = path,
-                    onValueChange = { path = it },
-                    label = { Text("Path") }
-                )
-                DropdownMenuWithTextField(
-                    listOf("Int", "Long", "Double", "Boolean", "String"),
-                    label = "Entrez votre valeur ici",
-                    onValueChanged = { selectedType2 = it }, // Fournir une fonction lambda vide pour onValueChanged
-                    onTextChange = { value = it })
-            }*/
+
             when (selectedType) {
                 "Text" -> {
                     OutlinedTextField(
@@ -134,14 +109,14 @@ class HTTPActivity : ComponentActivity() {
                 }
                 "Html" -> {
                     OutlinedTextField(
-                        value = tag,
-                        onValueChange = { tag = it },
+                        value = path,
+                        onValueChange = { path = it },
                         label = { Text("Tag") }
                     )
                     OutlinedTextField(
-                        value = if (position == -1) "" else position.toString(),
-                        onValueChange = { position = it.toIntOrNull() ?: -1 },
-                        label = { Text("Position") }
+                        value = pattern,
+                        onValueChange = { pattern = it },
+                        label = { Text("Pattern") }
                     )
                 }
                 "JSON" -> {
@@ -154,7 +129,7 @@ class HTTPActivity : ComponentActivity() {
                         listOf("Int", "Long", "Double", "Boolean", "String"),
                         label = "Entrez votre valeur ici",
                         onValueChanged = { selectedType2 = it },
-                        onTextChange = { value = it }
+                        onTextChange = { pattern = it }
                     )
                 }
             }
@@ -181,49 +156,32 @@ class HTTPActivity : ComponentActivity() {
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
-                    /*Thread {
-                        val request = Request.Builder().url(url).build()
-                        val client = OkHttpClient()
-                        client.newCall(request).enqueue(object : Callback {
-                            override fun onResponse(call: Call, response: Response) {
-                                responseBody = response.body?.string().toString()
-                                // responseBody contient la réponse JSON
-                            }
-
-                            override fun onFailure(call: Call, e: IOException) {
-                                // Gérer les erreurs de connexion ici
-                                e.printStackTrace()
-                            }
-                        })
-
-                    }.start()*/
                     coroutineScope.launch(Dispatchers.IO) {
-                        responseBody = HTTPClient.requestGET(url)
-                        Log.i("pattern", pattern)
-                        result = when (selectedType) {
-                            "Text" -> HTTPClient.findInText(pattern, responseBody)
-                            "Html" -> HTTPClient.findInHtml(tag, position, responseBody)
-                            "JSON" -> HTTPClient.findInJSON(responseBody, path, value, selectedType2)
-                            else -> null
-                        }
-                        var test = com.example.watchoid.entity.HTTPTest(date = "10/12/2000", dstIp = url, nbPerio = 2, periodicity = "Minutes", testAttendu = "true", testResult = result.toString(), testType = selectedType)
-                        MainActivity.database.http_test().insert(test)
-                        val query = selectAllFrom("http_tests")
-                        var id = MainActivity.database.http_test()
+                        if (TCPActivity.isConnectedToNetwork(context)){
+                            try {
+                                responseBody = HTTPClient.requestGET(url)
+                                result = when (selectedType) {
+                                    "Text" -> HTTPClient.findInText(pattern, responseBody)
+                                    "Html" -> HTTPClient.findInHtml(path, responseBody, pattern)
+                                    "JSON" -> HTTPClient.findInJSON(responseBody, path, pattern, selectedType2)
+                                    else -> null
+                                }
+                            } catch (e : IOException){
+                                result = false
+                            }
 
-                        var list = id.getAllTests(query)
-                        var alert = Alerts(idTest = list.size, testType = "HTTP", nbError = 0)
-                        MainActivity.database.alerts().insert(alert)
-                        /*if (selectedType=="Text"){
-                            result = HTTPClient.findInText(pattern, responseBody)
-                        }
-                        else if (selectedType=="Html"){
-                            result = HTTPClient.findInHtml(tag, position, responseBody)
-                        }
-                        else if (selectedType=="JSON"){
-                            result = HTTPClient.findInJSON(responseBody, path, value, selectedType2)
-                        }*/
 
+                            var test = com.example.watchoid.entity.HTTPTest(url = url, typeRequest = selectedType, pattern = pattern, path = path, typePattern = selectedType2)
+                            var idTest = MainActivity.database.http_test().insert(test)
+
+                            var alert = Alerts(idTest = idTest.toInt(), testType = "HTTP", nbError = 0 )
+                            MainActivity.database.alerts().insert(alert)
+                            withContext(Dispatchers.Main){
+                                Toast.makeText(context, "Test enregistré", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        else{
+                            Toast.makeText(context, "Aucune connexion réseau!!", Toast.LENGTH_SHORT).show()}
                     }
                 }
                 , shape = RoundedCornerShape(0.dp),
@@ -236,76 +194,70 @@ class HTTPActivity : ComponentActivity() {
     }
 
 
-    /*@Composable
-    fun HTTPTest() {
-        var url = URL("https://www.google.com/")
-        var response by remember { mutableStateOf(false) }
-        var error by remember { mutableStateOf(false) }
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally // Alignement horizontal au centre
-        ) {Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp) // Hauteur du rectangle
-                .background(color = Color.White) // Couleur du rectangle
-        ) {
-            if (response) {
-                Text(
-                    text = "La balise à été trouvé",
-                    modifier = Modifier.align(Alignment.Center)
-                )
+    companion object {
+        suspend fun automaticHTTPTest(context: Context) {
+            var result : Boolean
+            var responseBody : String
+            val service = AlertNotificationService(context)
+            val query = TCPActivity.selectAllFrom("http_tests")
+            var tests = MainActivity.database.http_test().getAllTests(query)
+            var period : Long = MainActivity.database.settingsTable().getSettingByProtocol("HTTP")?.periodicity?.toLong()
+                ?: 0
+            var periodicityUnit = MainActivity.database.settingsTable().getSettingByProtocol("HTTP")?.timeUnitPeriodicity
+            when(periodicityUnit){
+                "Min" -> period *= 60
+                "Heure" -> period *= 60*60
+                "Jour" -> period *= 24*60*60
             }
-            if(error){
-                Text(
-                    text = "La balise n'à pas été trouvé",
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-        }
-
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = {
-
-                    Thread {
-                        val connection = url.openConnection() as HttpURLConnection
-                        connection.requestMethod = "GET"
-
-                        val responseCode = connection.responseCode
-                        if (responseCode == HttpURLConnection.HTTP_OK) {
-                            val inputReader = BufferedReader(InputStreamReader(connection.inputStream))
-                            val responses = StringBuilder()
-
-                            var inputLine: String?
-                            while (inputReader.readLine().also { inputLine = it } != null) {
-                                responses.append(inputLine)
+            while (true) {
+                for (test in tests) {
+                    if (TCPActivity.isConnectedToNetwork(context)) {
+                        try {
+                            responseBody = HTTPClient.requestGET(test.url)
+                            when(test.typeRequest){
+                                "Html" -> result = HTTPClient.findInHtml(test.path, responseBody, test.pattern)
+                                "Text" -> result = HTTPClient.findInText(test.pattern, responseBody)
+                                "JSON" -> result = HTTPClient.findInJSON(responseBody, test.path, test.pattern, test.typePattern)
+                                else -> result = false
                             }
-                            inputReader.close()
-                            val regex = "<h12>(.*?)</h12>"
-                            val pattern: Pattern = Pattern.compile(regex)
-                            val matcher = pattern.matcher(responses.toString())
-                            if (matcher.find()) {
-                                val titre = matcher.group(1)
-                                println("Texte entre les balises <title> et </title> : $titre")
-                                response = true;
-                                error = false
-                            } else {
-                                println("Balise <title> non trouvée dans le texte.")
-                                error = true
-                            }
-                        } else {
-                            error = true
+                        } catch (e : IOException){
+                            result = false
                         }
-                    }.start()
+                        var log = com.example.watchoid.entity.Log(idTest = test.id_test, date = LocalDateTime.now().toString(), testType = "HTTP", result = result)
+                        MainActivity.database.log().insert(log)
+                        var firstAlert = MainActivity.database.alerts().getAlertByTestId(test.id_test, "HTTP")
+                        var alert : Alerts
+                        if (firstAlert != null && firstAlert.nbError!=10 && !result) {
+                            alert = Alerts(id_alert = firstAlert.id_alert, idTest = test.id_test, testType = "HTTP", nbError = (firstAlert?.nbError
+                                ?: 0) +1)
+                            MainActivity.database.alerts().update(alert)
+                            if (alert.nbError==MainActivity.database.settingsTable().getNbAlertByProtocol("HTTP")) {
+                                service.showNotificationAlert(test.id_test, "HTTP")
+                            }
+                        }
+                        else if (firstAlert != null && firstAlert.nbError==10 && result){
+                            service.showNotificationAlert2(test.id_test, "HTTP")
+                            if (firstAlert != null) {
+                                alert = Alerts(id_alert = firstAlert.id_alert, idTest = test.id_test, testType = "HTTP", nbError = 0)
+                                MainActivity.database.alerts().update(alert)
+                            }
+                        }
+
+                    }
+                    else{
+                        service.showNotificationInternet()
+                        val intent : Intent = Intent(context, TestService::class.java)
+                        intent.action = TestService.Actions.STOP.toString()
+                        context.startService(intent)
+                        return
+
+                    }
                 }
-                , shape = RoundedCornerShape(0.dp),
-                colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
-                Text("Envoyer")
+                delay(period*1000)
             }
         }
-    }*/
+
+    }
+
+
 }

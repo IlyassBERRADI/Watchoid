@@ -74,6 +74,9 @@ fun TicTacToeGame(){
     var winner2 by remember {
         mutableStateOf(false)
     }
+    var draw by remember {
+        mutableStateOf(false)
+    }
     var playerCell by remember {
         mutableStateOf(Array(3) { Array<Int>(3) { 0 } })
     }
@@ -117,6 +120,17 @@ fun TicTacToeGame(){
                     }
                 }
             }
+            Button(onClick = {
+                playerCell = Array(3) { Array<Int>(3) { 0 } }
+                winner2 = false
+                player1 = true
+                player2 = false
+            }) {
+                Text(text = "Restart")
+            }
+        }
+        else if (playerCell.all { subArray -> subArray.all { it != 0 } } ){
+            Text(text = "It's a draw!!!", fontSize = 34.sp)
             Button(onClick = {
                 playerCell = Array(3) { Array<Int>(3) { 0 } }
                 winner2 = false
@@ -242,6 +256,7 @@ fun GameTable(player1 : Boolean, player2 : Boolean, onPlay : ()->Unit, onWin1 : 
                     strokeWidth = 4f
                 )
             }
+
         }
         Column(
             modifier = Modifier.fillMaxSize(),

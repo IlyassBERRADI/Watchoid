@@ -1,16 +1,12 @@
 package com.example.watchoid.service
 
 import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
+import com.example.watchoid.HTTPActivity
 import com.example.watchoid.R
 import com.example.watchoid.TCPActivity
 import kotlinx.coroutines.CoroutineScope
@@ -45,12 +41,15 @@ class TestService : Service() {
         coroutineScope.launch {
             TCPActivity.automaticTCPTest(this@TestService)
         }
+        coroutineScope.launch {
+            HTTPActivity.automaticHTTPTest(this@TestService)
+        }
     }
 
     private fun stop() {
         if (::coroutineScope.isInitialized){
-            coroutineScope.cancel()  // Cancel the scope to stop the coroutine
-            stopSelf()  // Stop the service
+            coroutineScope.cancel()
+            stopSelf()
         }
     }
 

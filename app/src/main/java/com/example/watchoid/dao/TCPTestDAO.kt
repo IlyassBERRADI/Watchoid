@@ -12,7 +12,7 @@ import com.example.watchoid.entity.TCPTest
 @Dao
 interface TCPTestDAO {
     @Insert
-    suspend fun insert(tcpTest: TCPTest)
+    suspend fun insert(tcpTest: TCPTest): Long
 
     @Update
     suspend fun update(tcpTest: TCPTest)

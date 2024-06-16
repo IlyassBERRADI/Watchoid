@@ -17,6 +17,22 @@ class WatchoidApp : Application() {
             )
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
+
+            val channel2 = NotificationChannel(
+                "alertChannelId",
+                "Network tests alerts",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            val notificationManager2 = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager2.createNotificationChannel(channel2)
+
+            val channel3 = NotificationChannel(
+                "ConnectionChannelId",
+                "Network Connection alerts",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            val notificationManager3 = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager3.createNotificationChannel(channel3)
         }
     }
 }

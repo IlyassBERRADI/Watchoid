@@ -7,11 +7,9 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "http_tests")
 data class HTTPTest(
     @PrimaryKey(autoGenerate = true) val id_test: Int = 0,
-    @ColumnInfo(name = "date") val date: String,
-    @ColumnInfo(name = "dst_ip") val dstIp: String,
-    @ColumnInfo(name = "test_type") val testType: String,
-    @ColumnInfo(name = "test_result") val testResult: String,
-    @ColumnInfo(name = "test_attendu") val testAttendu: String,
-    @ColumnInfo(name = "nb_period") val nbPerio: Long,
-    @ColumnInfo(name = "periodicity") val periodicity: String
+    @ColumnInfo(name = "url") val url: String,
+    @ColumnInfo(name = "type_request") val typeRequest: String,
+    @ColumnInfo(name = "pattern") val pattern: String,
+    @ColumnInfo(name = "path") val path: String,
+    @ColumnInfo(name = "type_pattern") val typePattern: String,
 )

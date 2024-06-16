@@ -20,8 +20,8 @@ interface AlertDAO {
     @Query("SELECT * FROM alerts")
     suspend fun getAllTests(): List<Alerts>
 
-    @Query("SELECT * FROM alerts WHERE id_test = :id LIMIT 1")
-    suspend fun getAlertByTestId(id: Int): Alerts?
+    @Query("SELECT * FROM alerts WHERE id_test = :id AND test_type = :testType LIMIT 1")
+    suspend fun getAlertByTestId(id: Int, testType: String): Alerts?
 
     @Query("UPDATE alerts SET nb_error = nb_error + 1 WHERE id_test = :idTest AND test_type = :testType")
     suspend fun incrementNbError(idTest: Int, testType: String)

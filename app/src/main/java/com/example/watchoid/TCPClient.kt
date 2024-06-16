@@ -25,7 +25,6 @@ class TCPClient() {
                 var bool = socketChannel.connect(server)
                 Log.i("Server","Connected to server "+socketChannel.socket().remoteSocketAddress)
                 sentBuffer.flip()
-                //Log.i("striiing", StandardCharsets.UTF_8.decode(sentBuffer).toString())
                 var bytesWritten = socketChannel.write(sentBuffer)
                 if (closeInput){
                     socketChannel.socket().shutdownOutput()
@@ -52,27 +51,13 @@ class TCPClient() {
                         else {
                             bufferResponse = ByteBuffer.allocate(sizeBuffer)
                         }
-                        /*while (socketChannel.read(bufferResponse)!=-1){
-                            if (!bufferResponse.hasRemaining()){
-                                break
-                            }
-                        }*/
+
                     }
                 }
                 var result : String
-                var readBytes : Int
-                /*while ((readBytes=socketChannel.read(bufferResponse))!=-1){
-                    if (!bufferResponse.hasRemaining()){
-                        break
-                    }
-                }*/
-                while (true) {
-                    Log.i("starrrtt", "lesssggoooooo")
-                    Log.i("encoding", outEncoding)
-                    readBytes = socketChannel.read(bufferResponse)
-                    Log.i("bytesRead", readBytes.toString())
 
-                    if (readBytes == -1 || !bufferResponse.hasRemaining()) {
+                while (socketChannel.read(bufferResponse) != -1) {
+                    if (!bufferResponse.hasRemaining()) {
                         break
                     }
                 }
@@ -84,8 +69,6 @@ class TCPClient() {
                     "Long" -> result = bufferResponse.getLong().toString()
                     else -> {
 
-
-                        //bufferResponse.flip()
                         result = Charset.forName(outEncoding).decode(bufferResponse).toString()
 
                     }

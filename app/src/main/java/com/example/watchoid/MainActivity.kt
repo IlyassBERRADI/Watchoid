@@ -101,14 +101,6 @@ class MainActivity : ComponentActivity() {
                         fontWeight = FontWeight.Medium
                     )
                 }
-                /*Button(onClick = {
-                    val intent : Intent = Intent(context, TestService::class.java)
-                    intent.action = TestService.Actions.STOP.toString()
-                    context.startService(intent)
-                }, shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
-                    Text(text = "Stop tests", fontSize = 20.sp)
-                }*/
             }
             //applicationContext.deleteDatabase("my_database");
             var coroutine = rememberCoroutineScope();

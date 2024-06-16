@@ -199,7 +199,7 @@ fun DisplayTests() {
         httpTests.forEach { test ->
             val annotatedString = buildAnnotatedString {
                 withStyle(style = SpanStyle(fontSize = 20.sp)) {
-                    append("Test ID : ${test.id_test}, Result : ${test.testResult}")
+                    append("Test ID : ${test.id_test}, Url : ${test.url}")
                 }
             }
             Text(text = annotatedString)

@@ -107,16 +107,6 @@ class Settings : ComponentActivity() {
             InputTextField( nbError)
             Button(onClick = {
                 coroutineScope.launch {
-                    /*when(type2.value){
-                        "Min" -> inputValue.value=(inputValue.value.toInt()*60).toString()
-                        "Heure" -> inputValue.value=(inputValue.value.toInt()*60*60).toString()
-                        "Jour" ->  inputValue.value=(inputValue.value.toInt()*24*60*60).toString()
-                    }
-                    when(type3.value){
-                        "Min" -> timeDelete.value=(timeDelete.value.toInt()*60).toString()
-                        "Heure" -> timeDelete.value=(timeDelete.value.toInt()*60*60).toString()
-                        "Jour" ->  timeDelete.value=(timeDelete.value.toInt()*24*60*60).toString()
-                    }*/
                     var idstg = MainActivity.database.settingsTable().getSettingByProtocol(protocol.value)?.idSetting
                     var setting = idstg?.let {
                         com.example.watchoid.entity.Settings(idSetting = it, protocol = protocol.value, periodicity = inputValue.value.toInt(),

@@ -13,7 +13,7 @@ import com.example.watchoid.entity.ICMPTest
 @Dao
 interface HTTPTestDAO {
     @Insert
-    suspend fun insert(httpTest: HTTPTest)
+    suspend fun insert(httpTest: HTTPTest): Long
 
     @Update
     suspend fun update(httpTest: HTTPTest)

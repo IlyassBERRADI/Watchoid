@@ -92,11 +92,9 @@ class LogActivity : ComponentActivity() {
             }
             Button(onClick = {
                 CoroutineScope(IO).launch {
-                    var udp = MainActivity.database.http_test()
+                    var log = MainActivity.database.log()
                     selectedOption.value = "HTTP"
-                    val tableName = "http_tests"
-                    val query = selectAllFrom(tableName)
-                    anyList.value = udp.getAllTests(query)
+                    anyList.value = log.getLogsByProtocol("HTTP")
                 }
             }, shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(containerColor  = Color(0xFF2E698A))) {
@@ -124,21 +122,29 @@ class LogActivity : ComponentActivity() {
                     val state = rememberScrollState()
                     Column(Modifier.verticalScroll(state)) {
                         testList.forEach {
-                            Text(text = "Test ID : ${it.idTest} " + "Date : ${it.date} " + "Test Type : ${it.testType} " + "Test Result :  ${it.result} ")
+                            Row {
+                                Box(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
+                                    Text(text = "Test ID : ${it.idTest} " + "Date : ${it.date} " + "Test Type : ${it.testType} " + "Test Result :  ${it.result} ")
+                                }
+                            }
 
                         }
                     }
 
                 }
                 "HTTP" ->{
-                    val testList: List<HTTPTest> = anyList.value.mapNotNull { it as? HTTPTest }
-                    testList.forEach {
-                        Row {
-                            Box(modifier = Modifier.fillMaxWidth().padding(10.dp)){
-                                Text(text = "${it.id_test}"+" ${it.dstIp}"+" ${it.testType}"+" ${it.testResult}"+" ${it.testAttendu}"+" ${it.date}")
+                    val testList: List<Log> = anyList.value.mapNotNull { it as? Log }
+                    val state = rememberScrollState()
+                    Column(Modifier.verticalScroll(state)) {
+                        testList.forEach {
+                            Row {
+                                Box(modifier = Modifier.fillMaxWidth().padding(10.dp)){
+                                    Text(text = "Test ID : ${it.idTest} " + "Date : ${it.date} " + "Test Type : ${it.testType} " + "Test Result :  ${it.result} ")
+                                }
                             }
                         }
                     }
+
                 }
                 "ICMP" ->{
                     val testList: List<ICMPTest> = anyList.value.mapNotNull { it as? ICMPTest }
