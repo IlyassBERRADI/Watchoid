@@ -418,6 +418,12 @@ class ICMPActivityUser : ComponentActivity() {
             val query = selectAllFrom("icmp_tests")
             var tests = MainActivity.database.icmpTest().getAllTests(query)
             var period : Long = MainActivity.database.settingsTable().getSettingByProtocol("ICMP")?.periodicity?.toLong()?:0
+            var periodicityUnit = MainActivity.database.settingsTable().getSettingByProtocol("ICMP")?.timeUnitPeriodicity
+            when(periodicityUnit){
+                "Min" -> period *= 60
+                "Heure" -> period *= 60*60
+                "Jour" -> period *= 24*60*60
+            }
             while(true){
                 for(test in tests){
                     println("connectedToNetwork"+connectedToNetwork)

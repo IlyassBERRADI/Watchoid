@@ -390,6 +390,12 @@ class UDPActivityUser : ComponentActivity() {
             var tests = MainActivity.database.udpTest().getAllTests(query)
             var period : Long = MainActivity.database.settingsTable().getSettingByProtocol("UDP")?.periodicity?.toLong()
                 ?: 0
+            var periodicityUnit = MainActivity.database.settingsTable().getSettingByProtocol("UDP")?.timeUnitPeriodicity
+            when(periodicityUnit){
+                "Min" -> period *= 60
+                "Heure" -> period *= 60*60
+                "Jour" -> period *= 24*60*60
+            }
             while (true){
                 for (test in tests){
                     if (connectedToNetwork){
@@ -436,7 +442,7 @@ class UDPActivityUser : ComponentActivity() {
                         }
                         var log = com.example.watchoid.entity.Log(idTest = test.id_test, date = LocalDateTime.now().toString(), testType = "UDP", result = result)
                         MainActivity.database.log().insert(log)
-                        var firstAlert = MainActivity.database.alerts().getAlertByTestId(test.id_test)
+                        var firstAlert = MainActivity.database.alerts().getAlertByTestId(test.id_test, "UDP")
                         var alert : Alerts
                         if(!result){
                             alert = Alerts(idTest = test.id_test, testType = "UDP", nbError = (firstAlert?.nbError

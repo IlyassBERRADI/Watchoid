@@ -102,7 +102,7 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
-            applicationContext.deleteDatabase("my_database");
+            //applicationContext.deleteDatabase("my_database");
             var coroutine = rememberCoroutineScope();
 
             coroutine.launch {
