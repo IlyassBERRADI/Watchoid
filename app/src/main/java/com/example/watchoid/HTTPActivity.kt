@@ -237,10 +237,8 @@ class HTTPActivity : ComponentActivity() {
                         }
                         else if (firstAlert != null && firstAlert.nbError==10 && result){
                             service.showNotificationAlert2(test.id_test, "HTTP")
-                            if (firstAlert != null) {
-                                alert = Alerts(id_alert = firstAlert.id_alert, idTest = test.id_test, testType = "HTTP", nbError = 0)
-                                MainActivity.database.alerts().update(alert)
-                            }
+                            alert = Alerts(id_alert = firstAlert.id_alert, idTest = test.id_test, testType = "HTTP", nbError = 0)
+                            MainActivity.database.alerts().update(alert)
                         }
 
                     }

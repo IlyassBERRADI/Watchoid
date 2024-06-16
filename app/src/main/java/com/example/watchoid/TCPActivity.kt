@@ -362,24 +362,19 @@ class TCPActivity : ComponentActivity() {
                         MainActivity.database.log().insert(log)
                         var firstAlert = MainActivity.database.alerts().getAlertByTestId(test.idTest, "TCP")
                         var alert : Alerts
-                        if (!error && !result) {
-                            if (firstAlert != null) {
-                                alert = Alerts(id_alert = firstAlert.id_alert, idTest = test.idTest, testType = "TCP", nbError = (firstAlert?.nbError
-                                    ?: 0) +1)
-                                MainActivity.database.alerts().update(alert)
-                                if (alert.nbError==MainActivity.database.settingsTable().getNbAlertByProtocol("TCP")) {
-                                    service.showNotificationAlert(test.idTest, "TCP")
-                                    error = true
-                                }
+                        if (firstAlert != null && firstAlert.nbError!=10 && !result) {
+                            alert = Alerts(id_alert = firstAlert.id_alert, idTest = test.idTest, testType = "TCP", nbError = (firstAlert?.nbError
+                                ?: 0) +1)
+                            MainActivity.database.alerts().update(alert)
+                            if (alert.nbError==MainActivity.database.settingsTable().getNbAlertByProtocol("TCP")) {
+                                service.showNotificationAlert(test.idTest, "TCP")
                             }
+
                         }
-                        else if (error && result){
+                        else if (firstAlert != null && firstAlert.nbError==10 && result){
                             service.showNotificationAlert2(test.idTest, "TCP")
-                            if (firstAlert != null) {
-                                alert = Alerts(id_alert = firstAlert.id_alert, idTest = test.idTest, testType = "TCP", nbError = 0)
-                                MainActivity.database.alerts().update(alert)
-                            }
-                            error = false
+                            alert = Alerts(id_alert = firstAlert.id_alert, idTest = test.idTest, testType = "TCP", nbError = 0)
+                            MainActivity.database.alerts().update(alert)
                         }
                     }
                     else{
