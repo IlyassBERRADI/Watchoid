@@ -61,11 +61,6 @@
             android:label="@string/title_activity_settings"
             android:theme="@style/Theme.Watchoid" />
         <activity
-            android:name=".ICMPActivity"
-            android:exported="false"
-            android:label="@string/title_activity_icmpactivity"
-            android:theme="@style/Theme.Watchoid" />
-        <activity
             android:name=".ICMPActivityUser"
             android:exported="false"
             android:label="@string/title_activity_icmpactivity"

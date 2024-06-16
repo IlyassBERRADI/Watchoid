@@ -7,8 +7,10 @@ import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
 import com.example.watchoid.HTTPActivity
+import com.example.watchoid.ICMPActivityUser
 import com.example.watchoid.R
 import com.example.watchoid.TCPActivity
+import com.example.watchoid.UDPActivityUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.cancel
@@ -43,6 +45,12 @@ class TestService : Service() {
         }
         coroutineScope.launch {
             HTTPActivity.automaticHTTPTest(this@TestService)
+        }
+        coroutineScope.launch {
+            ICMPActivityUser.automaticICMPTest(this@TestService)
+        }
+        coroutineScope.launch {
+            UDPActivityUser.automaticUDPTest(this@TestService)
         }
     }
 

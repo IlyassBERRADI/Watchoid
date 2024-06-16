@@ -1,5 +1,8 @@
 package com.example.watchoid
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -53,6 +56,8 @@ import androidx.compose.material3.TextField
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.example.watchoid.entity.Alerts
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.delay
+import java.time.LocalDateTime
 
 
 class UDPActivityUser : ComponentActivity() {
@@ -286,40 +291,50 @@ class UDPActivityUser : ComponentActivity() {
                                 }
                             }
                             bb.flip()
+                            var sendBuffer = bb
                             dc.send(bb, server)
                             bb.clear()
                             dc.receive(bb)
                             bb.flip()
                             val resultString = StringBuilder()
+                            var listType = mutableListOf<String>()
                             expectedResult.forEach { result ->
                                 when(result.valueType.value) {
-                                    "Float" -> resultString.append(bb.getFloat())
-                                    "Double" -> resultString.append(bb.getDouble())
-                                    "Long" -> resultString.append(bb.getLong())
-                                    "Integer" -> resultString.append(bb.getInt())
+                                    "Float" -> {
+                                        resultString.append(bb.getFloat())
+                                        listType.add("Float")
+                                    }
+                                    "Double" -> {
+                                        resultString.append(bb.getDouble())
+                                        listType.add("Double")
+                                    }
+                                    "Long" -> {
+                                        resultString.append(bb.getLong())
+                                        listType.add("Long")
+                                    }
+                                    "Integer" -> {
+                                        resultString.append(bb.getInt())
+                                    }
                                     "String" -> {
-                                        // Lecture de la chaîne attendue
                                         val length = result.value.value.length
                                         val tmpbuffer = ByteBuffer.allocate(length)
-
-                                        // Limiter le buffer à la taille de la chaîne attendue
                                         bb.limit(bb.position() + length)
                                         tmpbuffer.put(bb)
                                         tmpbuffer.flip()
-
-                                        // Décoder les bytes en chaîne de caractères avec le charset spécifié
-                                        val charset = Charset.forName(result.charset.value)
-                                        val message = charset.decode(tmpbuffer).toString()
+                                        val charsetName = result.charset.value
+                                        val charsets = Charset.forName(charsetName)
+                                        val message = charsets.decode(tmpbuffer).toString()
                                         resultString.append(message)
-
-                                        // Réinitialiser la limite du buffer
                                         bb.limit(bb.capacity())
+                                        listType.add("String")
+                                        listType.add(length.toString())
+                                        listType.add(charsetName)
                                     }
                                 }
                             }
                             println(resultString.toString())
                             result.value = resultString.toString()
-                            var test = com.example.watchoid.entity.UDPTest(date = "100", dstIp = serverAddress.value, nbPerio = period.value.toLong(), periodicity = unitTime.value, testAttendu = resultString.toString(), testResult = result.value)
+                            var test = com.example.watchoid.entity.UDPTest(date = "100", dstIp = serverAddress.value, nbPerio = period.value.toLong(), periodicity = unitTime.value, testAttendu = resultString.toString(), testResult = result.value, dstPort = serverPort.value, buffer = sendBuffer, expectedResultList = listType)
                             MainActivity.database.udpTest().insert(test)
 
                             val query = selectAllFrom("udp_tests")
@@ -349,6 +364,93 @@ class UDPActivityUser : ComponentActivity() {
             println("Je susi ")
             result.value = "zoumiz"
         }
+    }
+
+    companion object {
+        @RequiresApi(Build.VERSION_CODES.N)
+        suspend fun automaticUDPTest(ctx : Context){
+            var isStopped : Boolean
+            var result : Boolean
+            var resultText : String
+            var connectedToNetwork : Boolean
+            var context = ctx//LocalContext.current
+            var response : String = ""
+            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val network = connectivityManager.activeNetwork
+                val capabilities = connectivityManager.getNetworkCapabilities(network)
+                val transport = capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                val transport2 = capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                connectedToNetwork = network!=null && capabilities!=null && (transport == true || transport2 == true)
+            } else {
+                val networkInfo = connectivityManager.activeNetworkInfo
+                connectedToNetwork = networkInfo!=null && (networkInfo.type == ConnectivityManager.TYPE_WIFI || networkInfo.type == ConnectivityManager.TYPE_MOBILE)
+            }
+            val query = selectAllFrom("udp_tests")
+            var tests = MainActivity.database.udpTest().getAllTests(query)
+            var period : Long = MainActivity.database.settingsTable().getSettingByProtocol("UDP")?.periodicity?.toLong()
+                ?: 0
+            while (true){
+                for (test in tests){
+                    if (connectedToNetwork){
+                        val dc = DatagramChannel.open().bind(null)
+                        var bb = ByteBuffer.allocate(1024)
+                        val server: InetSocketAddress =
+                            InetSocketAddress(test.dstIp, test.dstPort.toInt())
+                        dc.send(test.buffer, server)
+                        test.buffer.flip()
+                        dc.receive(bb)
+                        bb.flip()
+                        val resultString = StringBuilder()
+                        var i = 0
+                        test.expectedResultList.forEach { type ->
+                            when(type) {
+                                "Float" -> resultString.append(bb.getFloat())
+                                "Double" -> resultString.append(bb.getDouble())
+                                "Long" -> resultString.append(bb.getLong())
+                                "Integer" -> resultString.append(bb.getInt())
+                                "String" -> {
+
+                                    val length = test.expectedResultList.get(i+1).toInt()
+                                    val tmpbuffer = ByteBuffer.allocate(length)
+                                    println(length)
+                                    bb.limit(bb.position() + length)
+                                    tmpbuffer.put(bb)
+                                    tmpbuffer.flip()
+                                    val charset = test.expectedResultList.get(i+2)
+                                    val charsets = Charset.forName(charset)
+                                    val message = charsets.decode(tmpbuffer).toString()
+                                    resultString.append(message)
+                                    bb.limit(bb.capacity())
+                                }
+                            }
+                            println("je incrémente")
+                            i++
+                        }
+                        resultText = resultString.toString()
+                        println(resultText)
+                        if (resultText == test.testAttendu){
+                            result = true
+                        } else {
+                            result = false
+                        }
+                        var log = com.example.watchoid.entity.Log(idTest = test.id_test, date = LocalDateTime.now().toString(), testType = "UDP", result = result)
+                        MainActivity.database.log().insert(log)
+                        var firstAlert = MainActivity.database.alerts().getAlertByTestId(test.id_test)
+                        var alert : Alerts
+                        if(!result){
+                            alert = Alerts(idTest = test.id_test, testType = "UDP", nbError = (firstAlert?.nbError
+                                ?: 0) +1)
+                            MainActivity.database.alerts().insert(alert)
+                        }
+
+                    }
+                }
+                delay(period*1000)
+            }
+        }
+
+        private fun selectAllFrom(tableName: String) = SimpleSQLiteQuery("SELECT * FROM $tableName")
     }
 }
 

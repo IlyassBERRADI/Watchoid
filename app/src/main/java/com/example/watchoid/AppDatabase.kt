@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.example.watchoid.dao.AlertDAO
 import com.example.watchoid.dao.HTTPTestDAO
 import com.example.watchoid.dao.ICMPTestDAO
@@ -23,6 +24,7 @@ import com.example.watchoid.entity.UDPTest
 import com.example.watchoid.entity.User
 
 @Database(entities = [User::class, TCPTest::class, ICMPTest::class, UDPTest::class, Alerts::class, HTTPTest::class, com.example.watchoid.entity.Settings::class, TapTapGames::class, Log::class], version = 1)
+@TypeConverters(ListConvert::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun tcpTest(): TCPTestDAO

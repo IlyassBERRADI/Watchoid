@@ -9,7 +9,7 @@ import java.util.Date
 data class ICMPTest(
     @PrimaryKey(autoGenerate = true) val id_test: Int = 0,
     @ColumnInfo(name = "date") val date: String,
-    //@ColumnInfo(name = "source_ip") val sourceIp: String,
+    @ColumnInfo(name = "nb_packet") val nbPacket: String,
     @ColumnInfo(name = "dst_ip") val dstIp: String,
     @ColumnInfo(name = "test_type") val testType: String,
     @ColumnInfo(name = "tps_max") val tpsMax: Double?,
